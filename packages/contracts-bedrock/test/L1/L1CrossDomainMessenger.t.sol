@@ -18,6 +18,8 @@ import { OptimismPortal } from "src/L1/OptimismPortal.sol";
 import { SuperchainConfig } from "src/L1/SuperchainConfig.sol";
 import { SystemConfig } from "src/L1/SystemConfig.sol";
 
+import { CrossDomainMessenger } from "src/universal/CrossDomainMessenger.sol";
+
 contract L1CrossDomainMessenger_Test is Bridge_Initializer {
     /// @dev The receiver address
     address recipient = address(0xabbaacdc);
@@ -770,7 +772,10 @@ contract L1CrossDomainMessenger_ReinitReentryTest is Bridge_Initializer {
 
             // call the initializer function
             l1CrossDomainMessenger.initialize(
-                SuperchainConfig(superchainConfig), OptimismPortal(optimismPortal), SystemConfig(systemConfig)
+                SuperchainConfig(superchainConfig),
+                OptimismPortal(optimismPortal),
+                SystemConfig(systemConfig),
+                CrossDomainMessenger(address(0))
             );
 
             // attempt to re-replay the withdrawal

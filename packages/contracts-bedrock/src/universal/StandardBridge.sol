@@ -12,6 +12,8 @@ import { OptimismMintableERC20 } from "src/universal/OptimismMintableERC20.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Constants } from "src/libraries/Constants.sol";
 
+import { LibFacet } from "src/libraries/LibFacet.sol";
+
 /// @custom:upgradeable
 /// @title StandardBridge
 /// @notice StandardBridge is a base contract for the L1 and L2 standard ERC20 bridges. It handles
@@ -103,12 +105,25 @@ abstract contract StandardBridge is Initializable {
         _;
     }
 
+    function onL1() internal pure virtual returns (bool);
+
+    function onL2() internal pure returns (bool) {
+        return !onL1();
+    }
+
     /// @notice Ensures that the caller is a cross-chain message from the other bridge.
     modifier onlyOtherBridge() {
-        require(
-            msg.sender == address(messenger) && messenger.xDomainMessageSender() == address(otherBridge),
-            "StandardBridge: function can only be called from the other bridge"
-        );
+        if (onL1()) {
+            require(
+                msg.sender == address(messenger) && messenger.xDomainMessageSender() == address(otherBridge),
+                "StandardBridge: function can only be called from the L2 bridge"
+            );
+        } else {
+            require(
+                msg.sender == address(otherBridge),
+                "StandardBridge: function can only be called from the L1 bridge"
+            );
+        }
         _;
     }
 
@@ -373,22 +388,42 @@ abstract contract StandardBridge is Initializable {
         // contracts may override this function in order to emit legacy events as well.
         _emitERC20BridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
 
-        messenger.sendMessage({
-            _target: address(otherBridge),
-            _message: abi.encodeWithSelector(
-                this.finalizeBridgeERC20.selector,
-                // Because this call will be executed on the remote chain, we reverse the order of
-                // the remote and local token addresses relative to their order in the
-                // finalizeBridgeERC20 function.
-                _remoteToken,
-                _localToken,
-                _from,
-                _to,
-                _amount,
-                _extraData
-            ),
-            _minGasLimit: _minGasLimit
-        });
+        if (onL1()) {
+            LibFacet.sendFacetTransaction({
+                value: 0,
+                gasLimit: 500_000,
+                to: address(otherBridge),
+                data: abi.encodeWithSelector(
+                    this.finalizeBridgeERC20.selector,
+                    // Because this call will be executed on the remote chain, we reverse the order of
+                    // the remote and local token addresses relative to their order in the
+                    // finalizeBridgeERC20 function.
+                    _remoteToken,
+                    _localToken,
+                    _from,
+                    _to,
+                    _amount,
+                    _extraData
+                )
+            });
+        } else {
+            messenger.sendMessage({
+                _target: address(otherBridge),
+                _message: abi.encodeWithSelector(
+                    this.finalizeBridgeERC20.selector,
+                    // Because this call will be executed on the remote chain, we reverse the order of
+                    // the remote and local token addresses relative to their order in the
+                    // finalizeBridgeERC20 function.
+                    _remoteToken,
+                    _localToken,
+                    _from,
+                    _to,
+                    _amount,
+                    _extraData
+                ),
+                _minGasLimit: _minGasLimit
+            });
+        }
     }
 
     /// @notice Checks if a given address is an OptimismMintableERC20. Not perfect, but good enough.

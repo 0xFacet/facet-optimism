@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.15;
+
+import { LibString } from "@solady/utils/LibString.sol";
+import { LibRLP } from "./LibRLP.sol";
+import "forge-std/console2.sol";
+
+library LibFacet {
+    using LibRLP for LibRLP.List;
+
+    address constant facetInboxAddress = 0x00000000000000000000000000000000000FacE7;
+    uint8 constant facetTxType = 70;
+
+    function sendFacetTransaction(
+        address to,
+        uint256 value,
+        uint256 maxFeePerGas,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        sendFacetTransaction(abi.encodePacked(to), value, maxFeePerGas, gasLimit, data);
+    }
+
+    function sendFacetTransaction(
+        uint256 value,
+        uint256 maxFeePerGas,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        sendFacetTransaction(bytes(''), value, maxFeePerGas, gasLimit, data);
+    }
+
+    function sendFacetTransaction(
+        uint256 value,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        sendFacetTransaction(bytes(''), value, 0, gasLimit, data);
+    }
+
+    function sendFacetTransaction(
+        address to,
+        uint256 value,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        sendFacetTransaction(abi.encodePacked(to), value, 0, gasLimit, data);
+    }
+
+    function sendFacetTransaction(
+        bytes memory to,
+        uint256 value,
+        uint256 maxFeePerGas,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        uint256 chainId;
+
+        if (block.chainid == 1) {
+            chainId = 0xface7;
+        } else if (block.chainid == 11155111) {
+            chainId = 0xface7a;
+        } else {
+            revert("Unsupported chainId");
+        }
+
+        LibRLP.List memory list;
+
+        list.p(chainId);
+        list.p(to);
+        list.p(value);
+        list.p(maxFeePerGas);
+        list.p(gasLimit);
+        list.p(data);
+
+        bytes memory out = abi.encodePacked(facetTxType, list.encode());
+        // console2.log(LibString.toHexString(out));
+        (bool success,) = facetInboxAddress.call(out);
+
+        require(success, "call failed");
+    }
+}

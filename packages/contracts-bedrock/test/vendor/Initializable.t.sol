@@ -4,6 +4,7 @@ pragma solidity 0.8.15;
 import { Bridge_Initializer } from "test/setup/Bridge_Initializer.sol";
 import { Executables } from "scripts/libraries/Executables.sol";
 import { CrossDomainMessenger } from "src/universal/CrossDomainMessenger.sol";
+import { StandardBridge } from "src/universal/StandardBridge.sol";
 import { L2OutputOracle } from "src/L1/L2OutputOracle.sol";
 import { SystemConfig } from "src/L1/SystemConfig.sol";
 import { SuperchainConfig } from "src/L1/SuperchainConfig.sol";
@@ -62,7 +63,7 @@ contract Initializer_Test is Bridge_Initializer {
             InitializeableContract({
                 target: deploy.mustGetAddress("L1CrossDomainMessenger"),
                 initCalldata: abi.encodeCall(
-                    l1CrossDomainMessenger.initialize, (superchainConfig, optimismPortal, systemConfig)
+                    l1CrossDomainMessenger.initialize, (superchainConfig, optimismPortal, systemConfig, CrossDomainMessenger(address(0)))
                 ),
                 initializedSlotVal: deploy.loadInitializedSlot("L1CrossDomainMessenger")
             })
@@ -72,7 +73,7 @@ contract Initializer_Test is Bridge_Initializer {
             InitializeableContract({
                 target: address(l1CrossDomainMessenger),
                 initCalldata: abi.encodeCall(
-                    l1CrossDomainMessenger.initialize, (superchainConfig, optimismPortal, systemConfig)
+                    l1CrossDomainMessenger.initialize, (superchainConfig, optimismPortal, systemConfig, CrossDomainMessenger(address(0)))
                 ),
                 initializedSlotVal: deploy.loadInitializedSlot("L1CrossDomainMessengerProxy")
             })
@@ -262,7 +263,7 @@ contract Initializer_Test is Bridge_Initializer {
             InitializeableContract({
                 target: deploy.mustGetAddress("L1StandardBridge"),
                 initCalldata: abi.encodeCall(
-                    l1StandardBridge.initialize, (l1CrossDomainMessenger, superchainConfig, systemConfig)
+                    l1StandardBridge.initialize, (l1CrossDomainMessenger, superchainConfig, systemConfig, StandardBridge(payable(address(0))))
                 ),
                 initializedSlotVal: deploy.loadInitializedSlot("L1StandardBridge")
             })
@@ -272,7 +273,7 @@ contract Initializer_Test is Bridge_Initializer {
             InitializeableContract({
                 target: address(l1StandardBridge),
                 initCalldata: abi.encodeCall(
-                    l1StandardBridge.initialize, (l1CrossDomainMessenger, superchainConfig, systemConfig)
+                    l1StandardBridge.initialize, (l1CrossDomainMessenger, superchainConfig, systemConfig, StandardBridge(payable(address(0))))
                 ),
                 initializedSlotVal: deploy.loadInitializedSlot("L1StandardBridgeProxy")
             })
@@ -281,7 +282,7 @@ contract Initializer_Test is Bridge_Initializer {
         contracts.push(
             InitializeableContract({
                 target: address(l2StandardBridge),
-                initCalldata: abi.encodeCall(l2StandardBridge.initialize, (l1StandardBridge)),
+                initCalldata: abi.encodeCall(l2StandardBridge.initialize, (l1StandardBridge, CrossDomainMessenger(address(0)))),
                 initializedSlotVal: deploy.loadInitializedSlot("L2StandardBridge")
             })
         );
@@ -289,7 +290,7 @@ contract Initializer_Test is Bridge_Initializer {
         contracts.push(
             InitializeableContract({
                 target: address(l2StandardBridge),
-                initCalldata: abi.encodeCall(l2StandardBridge.initialize, (l1StandardBridge)),
+                initCalldata: abi.encodeCall(l2StandardBridge.initialize, (l1StandardBridge, CrossDomainMessenger(address(0)))),
                 initializedSlotVal: deploy.loadInitializedSlot("L2StandardBridgeInterop")
             })
         );

@@ -24,6 +24,7 @@ import { OptimismPortal2 } from "src/L1/OptimismPortal2.sol";
 import { OptimismPortalInterop } from "src/L1/OptimismPortalInterop.sol";
 import { L1ChugSplashProxy } from "src/legacy/L1ChugSplashProxy.sol";
 import { ResolvedDelegateProxy } from "src/legacy/ResolvedDelegateProxy.sol";
+import { L2CrossDomainMessenger } from "src/L2/L2CrossDomainMessenger.sol";
 import { L1CrossDomainMessenger } from "src/L1/L1CrossDomainMessenger.sol";
 import { L2OutputOracle } from "src/L1/L2OutputOracle.sol";
 import { OptimismMintableERC20Factory } from "src/universal/OptimismMintableERC20Factory.sol";
@@ -149,16 +150,16 @@ contract Deploy is Deployer {
             L1CrossDomainMessenger: mustGetAddress("L1CrossDomainMessengerProxy"),
             L1StandardBridge: mustGetAddress("L1StandardBridgeProxy"),
             L2OutputOracle: mustGetAddress("L2OutputOracleProxy"),
-            DisputeGameFactory: mustGetAddress("DisputeGameFactoryProxy"),
-            DelayedWETH: mustGetAddress("DelayedWETHProxy"),
-            PermissionedDelayedWETH: mustGetAddress("PermissionedDelayedWETHProxy"),
-            AnchorStateRegistry: mustGetAddress("AnchorStateRegistryProxy"),
-            OptimismMintableERC20Factory: mustGetAddress("OptimismMintableERC20FactoryProxy"),
+            DisputeGameFactory: getAddress("DisputeGameFactoryProxy"),
+            DelayedWETH: getAddress("DelayedWETHProxy"),
+            PermissionedDelayedWETH: getAddress("PermissionedDelayedWETHProxy"),
+            AnchorStateRegistry: getAddress("AnchorStateRegistryProxy"),
+            OptimismMintableERC20Factory: getAddress("OptimismMintableERC20FactoryProxy"),
             OptimismPortal: mustGetAddress("OptimismPortalProxy"),
-            OptimismPortal2: mustGetAddress("OptimismPortalProxy"),
+            OptimismPortal2: getAddress("OptimismPortalProxy"),
             SystemConfig: mustGetAddress("SystemConfigProxy"),
-            L1ERC721Bridge: mustGetAddress("L1ERC721BridgeProxy"),
-            ProtocolVersions: mustGetAddress("ProtocolVersionsProxy"),
+            L1ERC721Bridge: getAddress("L1ERC721BridgeProxy"),
+            ProtocolVersions: getAddress("ProtocolVersionsProxy"),
             SuperchainConfig: mustGetAddress("SuperchainConfigProxy")
         });
     }
@@ -326,9 +327,9 @@ contract Deploy is Deployer {
         initializeSuperchainConfig();
 
         // Deploy the ProtocolVersionsProxy
-        deployERC1967Proxy("ProtocolVersionsProxy");
-        deployProtocolVersions();
-        initializeProtocolVersions();
+        // deployERC1967Proxy("ProtocolVersionsProxy");
+        // deployProtocolVersions();
+        // initializeProtocolVersions();
     }
 
     /// @notice Deploy a new OP Chain, with an existing SuperchainConfig provided
@@ -345,13 +346,13 @@ contract Deploy is Deployer {
         deployImplementations();
         initializeImplementations();
 
-        setAlphabetFaultGameImplementation({ _allowUpgrade: false });
-        setFastFaultGameImplementation({ _allowUpgrade: false });
-        setCannonFaultGameImplementation({ _allowUpgrade: false });
-        setPermissionedCannonFaultGameImplementation({ _allowUpgrade: false });
+        // setAlphabetFaultGameImplementation({ _allowUpgrade: false });
+        // setFastFaultGameImplementation({ _allowUpgrade: false });
+        // setCannonFaultGameImplementation({ _allowUpgrade: false });
+        // setPermissionedCannonFaultGameImplementation({ _allowUpgrade: false });
 
-        transferDisputeGameFactoryOwnership();
-        transferDelayedWETHOwnership();
+        // transferDisputeGameFactoryOwnership();
+        // transferDelayedWETHOwnership();
     }
 
     /// @notice Deploy all of the proxies
@@ -362,17 +363,17 @@ contract Deploy is Deployer {
         deployERC1967Proxy("SystemConfigProxy");
         deployL1StandardBridgeProxy();
         deployL1CrossDomainMessengerProxy();
-        deployERC1967Proxy("OptimismMintableERC20FactoryProxy");
-        deployERC1967Proxy("L1ERC721BridgeProxy");
+        // deployERC1967Proxy("OptimismMintableERC20FactoryProxy");
+        // deployERC1967Proxy("L1ERC721BridgeProxy");
 
         // Both the DisputeGameFactory and L2OutputOracle proxies are deployed regardless of whether fault proofs is
         // enabled to prevent a nastier refactor to the deploy scripts. In the future, the L2OutputOracle will be
         // removed. If fault proofs are not enabled, the DisputeGameFactory proxy will be unused.
-        deployERC1967Proxy("DisputeGameFactoryProxy");
+        // deployERC1967Proxy("DisputeGameFactoryProxy");
         deployERC1967Proxy("L2OutputOracleProxy");
-        deployERC1967Proxy("DelayedWETHProxy");
-        deployERC1967Proxy("PermissionedDelayedWETHProxy");
-        deployERC1967Proxy("AnchorStateRegistryProxy");
+        // deployERC1967Proxy("DelayedWETHProxy");
+        // deployERC1967Proxy("PermissionedDelayedWETHProxy");
+        // deployERC1967Proxy("AnchorStateRegistryProxy");
 
         transferAddressManagerOwnership(); // to the ProxyAdmin
     }
@@ -381,19 +382,19 @@ contract Deploy is Deployer {
     function deployImplementations() public {
         console.log("Deploying implementations");
         deployL1CrossDomainMessenger();
-        deployOptimismMintableERC20Factory();
+        // deployOptimismMintableERC20Factory();
         deploySystemConfig();
         deployL1StandardBridge();
-        deployL1ERC721Bridge();
+        // deployL1ERC721Bridge();
         deployOptimismPortal();
         deployL2OutputOracle();
         // Fault proofs
-        deployOptimismPortal2();
-        deployDisputeGameFactory();
-        deployDelayedWETH();
-        deployPreimageOracle();
-        deployMips();
-        deployAnchorStateRegistry();
+        // deployOptimismPortal2();
+        // deployDisputeGameFactory();
+        // deployDelayedWETH();
+        // deployPreimageOracle();
+        // deployMips();
+        // deployAnchorStateRegistry();
     }
 
     /// @notice Initialize all of the implementations
@@ -410,14 +411,14 @@ contract Deploy is Deployer {
 
         initializeSystemConfig();
         initializeL1StandardBridge();
-        initializeL1ERC721Bridge();
-        initializeOptimismMintableERC20Factory();
+        // initializeL1ERC721Bridge();
+        // initializeOptimismMintableERC20Factory();
         initializeL1CrossDomainMessenger();
         initializeL2OutputOracle();
-        initializeDisputeGameFactory();
-        initializeDelayedWETH();
-        initializePermissionedDelayedWETH();
-        initializeAnchorStateRegistry();
+        // initializeDisputeGameFactory();
+        // initializeDelayedWETH();
+        // initializePermissionedDelayedWETH();
+        // initializeAnchorStateRegistry();
     }
 
     /// @notice Add AltDA setup to the OP chain
@@ -1068,11 +1069,11 @@ contract Deploy is Deployer {
                     cfg.batchInboxAddress(),
                     SystemConfig.Addresses({
                         l1CrossDomainMessenger: mustGetAddress("L1CrossDomainMessengerProxy"),
-                        l1ERC721Bridge: mustGetAddress("L1ERC721BridgeProxy"),
+                        l1ERC721Bridge: getAddress("L1ERC721BridgeProxy"),
                         l1StandardBridge: mustGetAddress("L1StandardBridgeProxy"),
-                        disputeGameFactory: mustGetAddress("DisputeGameFactoryProxy"),
+                        disputeGameFactory: getAddress("DisputeGameFactoryProxy"),
                         optimismPortal: mustGetAddress("OptimismPortalProxy"),
-                        optimismMintableERC20Factory: mustGetAddress("OptimismMintableERC20FactoryProxy"),
+                        optimismMintableERC20Factory: getAddress("OptimismMintableERC20FactoryProxy"),
                         gasPayingToken: customGasTokenAddress
                     })
                 )
@@ -1115,7 +1116,8 @@ contract Deploy is Deployer {
                 (
                     L1CrossDomainMessenger(l1CrossDomainMessengerProxy),
                     SuperchainConfig(superchainConfigProxy),
-                    SystemConfig(systemConfigProxy)
+                    SystemConfig(systemConfigProxy),
+                    StandardBridge(payable(vm.envAddress("L2_STANDARD_BRIDGE")))
                 )
             )
         });
@@ -1153,8 +1155,8 @@ contract Deploy is Deployer {
     /// @notice Initialize the OptimismMintableERC20Factory
     function initializeOptimismMintableERC20Factory() public broadcast {
         console.log("Upgrading and initializing OptimismMintableERC20Factory proxy");
-        address optimismMintableERC20FactoryProxy = mustGetAddress("OptimismMintableERC20FactoryProxy");
-        address optimismMintableERC20Factory = mustGetAddress("OptimismMintableERC20Factory");
+        address optimismMintableERC20FactoryProxy = getAddress("OptimismMintableERC20FactoryProxy");
+        address optimismMintableERC20Factory = getAddress("OptimismMintableERC20Factory");
         address l1StandardBridgeProxy = mustGetAddress("L1StandardBridgeProxy");
 
         _upgradeAndCallViaSafe({
@@ -1213,7 +1215,8 @@ contract Deploy is Deployer {
                 (
                     SuperchainConfig(superchainConfigProxy),
                     OptimismPortal(payable(optimismPortalProxy)),
-                    SystemConfig(systemConfigProxy)
+                    SystemConfig(systemConfigProxy),
+                    L2CrossDomainMessenger(vm.envAddress("L2_CROSS_DOMAIN_MESSENGER"))
                 )
             )
         });

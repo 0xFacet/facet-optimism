@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import { Predeploys } from "src/libraries/Predeploys.sol";
 import { OptimismPortal } from "src/L1/OptimismPortal.sol";
 import { CrossDomainMessenger } from "src/universal/CrossDomainMessenger.sol";
 import { ISemver } from "src/universal/ISemver.sol";
 import { SuperchainConfig } from "src/L1/SuperchainConfig.sol";
 import { SystemConfig } from "src/L1/SystemConfig.sol";
+
+import { LibFacet } from "src/libraries/LibFacet.sol";
 
 /// @custom:proxied
 /// @title L1CrossDomainMessenger
@@ -33,7 +34,8 @@ contract L1CrossDomainMessenger is CrossDomainMessenger, ISemver {
         initialize({
             _superchainConfig: SuperchainConfig(address(0)),
             _portal: OptimismPortal(payable(address(0))),
-            _systemConfig: SystemConfig(address(0))
+            _systemConfig: SystemConfig(address(0)),
+            _otherMessenger: CrossDomainMessenger(address(0))
         });
     }
 
@@ -44,7 +46,8 @@ contract L1CrossDomainMessenger is CrossDomainMessenger, ISemver {
     function initialize(
         SuperchainConfig _superchainConfig,
         OptimismPortal _portal,
-        SystemConfig _systemConfig
+        SystemConfig _systemConfig,
+        CrossDomainMessenger _otherMessenger
     )
         public
         initializer
@@ -52,7 +55,7 @@ contract L1CrossDomainMessenger is CrossDomainMessenger, ISemver {
         superchainConfig = _superchainConfig;
         portal = _portal;
         systemConfig = _systemConfig;
-        __CrossDomainMessenger_init({ _otherMessenger: CrossDomainMessenger(Predeploys.L2_CROSS_DOMAIN_MESSENGER) });
+        __CrossDomainMessenger_init({ _otherMessenger: _otherMessenger });
     }
 
     /// @inheritdoc CrossDomainMessenger
@@ -70,13 +73,7 @@ contract L1CrossDomainMessenger is CrossDomainMessenger, ISemver {
 
     /// @inheritdoc CrossDomainMessenger
     function _sendMessage(address _to, uint64 _gasLimit, uint256 _value, bytes memory _data) internal override {
-        portal.depositTransaction{ value: _value }({
-            _to: _to,
-            _value: _value,
-            _gasLimit: _gasLimit,
-            _isCreation: false,
-            _data: _data
-        });
+        revert("Use LibFacet.sendFacetTransaction instead");
     }
 
     /// @inheritdoc CrossDomainMessenger

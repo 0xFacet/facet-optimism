@@ -371,7 +371,9 @@ contract OptimismPortal is Initializable, ResourceMetering, ISemver {
 
         bool success;
         (address token,) = gasPayingToken();
-        if (token == Constants.ETHER) {
+        if (token == Constants.FACET_COMPUTE_TOKEN) {
+            require(_tx.value == 0, "Facet: value is not supported for ETH");
+
             // Trigger the call to the target contract. We use a custom low level method
             // SafeCall.callWithMinGas to ensure two key properties
             //   1. Target contracts cannot force this call to run out of gas by returning a very large
@@ -528,6 +530,8 @@ contract OptimismPortal is Initializable, ResourceMetering, ISemver {
     )
         internal
     {
+        revert("Use LibFacet.sendFacetTransaction instead");
+
         // Just to be safe, make sure that people specify address(0) as the target when doing
         // contract creations.
         if (_isCreation && _to != address(0)) revert BadTarget();

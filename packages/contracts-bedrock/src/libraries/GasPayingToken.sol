@@ -54,7 +54,7 @@ library GasPayingToken {
     function getName() internal view returns (string memory name_) {
         (address addr,) = getToken();
         if (addr == Constants.ETHER) {
-            name_ = "Ether";
+            name_ = "Facet Compute Token";
         } else {
             name_ = LibString.fromSmallString(Storage.getBytes32(GAS_PAYING_TOKEN_NAME_SLOT));
         }
@@ -65,7 +65,7 @@ library GasPayingToken {
     function getSymbol() internal view returns (string memory symbol_) {
         (address addr,) = getToken();
         if (addr == Constants.ETHER) {
-            symbol_ = "ETH";
+            symbol_ = "FCT";
         } else {
             symbol_ = LibString.fromSmallString(Storage.getBytes32(GAS_PAYING_TOKEN_SYMBOL_SLOT));
         }

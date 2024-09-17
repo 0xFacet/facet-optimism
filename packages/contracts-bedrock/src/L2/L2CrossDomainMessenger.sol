@@ -39,6 +39,11 @@ contract L2CrossDomainMessenger is CrossDomainMessenger, ISemver {
         return otherMessenger;
     }
 
+    // TODO: Permissioned function to set the other messenger
+    function setOtherMessenger(CrossDomainMessenger _otherMessenger) public {
+        otherMessenger = _otherMessenger;
+    }
+
     /// @inheritdoc CrossDomainMessenger
     function _sendMessage(address _to, uint64 _gasLimit, uint256 _value, bytes memory _data) internal override {
         L2ToL1MessagePasser(payable(Predeploys.L2_TO_L1_MESSAGE_PASSER)).initiateWithdrawal{ value: _value }(

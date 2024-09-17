@@ -32,6 +32,7 @@ library Constants {
 
     /// @notice The address that represents ether when dealing with ERC20 token addresses.
     address internal constant ETHER = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address internal constant FACET_COMPUTE_TOKEN = ETHER;
 
     /// @notice The address that represents the system caller responsible for L1 attributes
     ///         transactions.

@@ -296,11 +296,11 @@ contract L2Genesis is Deployer {
             impl = _setImplementationCode(Predeploys.L2_STANDARD_BRIDGE);
         }
 
-        L2StandardBridge(payable(impl)).initialize({ _otherBridge: L1StandardBridge(payable(address(0))) });
+        // L2StandardBridge(payable(impl)).initialize({ _otherBridge: L1StandardBridge(payable(address(0))) });
 
-        L2StandardBridge(payable(Predeploys.L2_STANDARD_BRIDGE)).initialize({
-            _otherBridge: L1StandardBridge(_l1StandardBridgeProxy)
-        });
+        // L2StandardBridge(payable(Predeploys.L2_STANDARD_BRIDGE)).initialize({
+        //     _otherBridge: L1StandardBridge(_l1StandardBridgeProxy)
+        // });
     }
 
     /// @notice This predeploy is following the safety invariant #1.

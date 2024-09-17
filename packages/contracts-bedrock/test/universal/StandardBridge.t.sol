@@ -13,6 +13,10 @@ import { Constants } from "src/libraries/Constants.sol";
 contract StandardBridgeTester is StandardBridge {
     constructor() StandardBridge() { }
 
+    function onL1() internal pure override returns (bool) {
+        return true;
+    }
+
     function isOptimismMintableERC20(address _token) external view returns (bool) {
         return _isOptimismMintableERC20(_token);
     }

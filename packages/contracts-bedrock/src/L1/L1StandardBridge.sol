@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import { Predeploys } from "src/libraries/Predeploys.sol";
 import { StandardBridge } from "src/universal/StandardBridge.sol";
 import { ISemver } from "src/universal/ISemver.sol";
 import { CrossDomainMessenger } from "src/universal/CrossDomainMessenger.sol";
@@ -80,12 +79,17 @@ contract L1StandardBridge is StandardBridge, ISemver {
     /// @notice Address of the SystemConfig contract.
     SystemConfig public systemConfig;
 
+    function onL1() internal pure override returns (bool) {
+        return true;
+    }
+
     /// @notice Constructs the L1StandardBridge contract.
     constructor() StandardBridge() {
         initialize({
             _messenger: CrossDomainMessenger(address(0)),
             _superchainConfig: SuperchainConfig(address(0)),
-            _systemConfig: SystemConfig(address(0))
+            _systemConfig: SystemConfig(address(0)),
+            _otherBridge: StandardBridge(payable(address(0)))
         });
     }
 
@@ -95,7 +99,8 @@ contract L1StandardBridge is StandardBridge, ISemver {
     function initialize(
         CrossDomainMessenger _messenger,
         SuperchainConfig _superchainConfig,
-        SystemConfig _systemConfig
+        SystemConfig _systemConfig,
+        StandardBridge _otherBridge
     )
         public
         initializer
@@ -104,7 +109,7 @@ contract L1StandardBridge is StandardBridge, ISemver {
         systemConfig = _systemConfig;
         __StandardBridge_init({
             _messenger: _messenger,
-            _otherBridge: StandardBridge(payable(Predeploys.L2_STANDARD_BRIDGE))
+            _otherBridge: _otherBridge
         });
     }
 
