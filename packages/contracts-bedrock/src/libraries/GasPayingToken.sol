@@ -42,7 +42,7 @@ library GasPayingToken {
         bytes32 slot = Storage.getBytes32(GAS_PAYING_TOKEN_SLOT);
         addr_ = address(uint160(uint256(slot) & uint256(type(uint160).max)));
         if (addr_ == address(0)) {
-            addr_ = Constants.ETHER;
+            addr_ = Constants.FACET_COMPUTE_TOKEN;
             decimals_ = 18;
         } else {
             decimals_ = uint8(uint256(slot) >> 160);
@@ -53,7 +53,7 @@ library GasPayingToken {
     ///         If nothing is set in storage, then the ether name, 'Ether', is returned instead.
     function getName() internal view returns (string memory name_) {
         (address addr,) = getToken();
-        if (addr == Constants.ETHER) {
+        if (addr == Constants.FACET_COMPUTE_TOKEN) {
             name_ = "Facet Compute Token";
         } else {
             name_ = LibString.fromSmallString(Storage.getBytes32(GAS_PAYING_TOKEN_NAME_SLOT));
@@ -64,7 +64,7 @@ library GasPayingToken {
     ///         If nothing is set in storage, then the ether symbol, 'ETH', is returned instead.
     function getSymbol() internal view returns (string memory symbol_) {
         (address addr,) = getToken();
-        if (addr == Constants.ETHER) {
+        if (addr == Constants.FACET_COMPUTE_TOKEN) {
             symbol_ = "FCT";
         } else {
             symbol_ = LibString.fromSmallString(Storage.getBytes32(GAS_PAYING_TOKEN_SYMBOL_SLOT));
