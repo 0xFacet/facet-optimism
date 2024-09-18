@@ -257,6 +257,18 @@ func (s *Driver) eventLoop() {
 				}
 			}
 		case newL1Head := <-s.l1HeadSig:
+			result, err := sync.CurrentHeads(s.driverCtx, s.Config, s.L2)
+
+			if err != nil {
+				s.log.Error("Failed to find L2 heads", "err", err)
+			} else {
+				engine.ForceEngineReset(s.Engine, engine.ForceEngineResetEvent{
+					Unsafe:    result.Unsafe,
+					Safe:      result.Safe,
+					Finalized: result.Finalized,
+				})
+			}
+
 			s.Emitter.Emit(status.L1UnsafeEvent{L1Unsafe: newL1Head})
 			reqStep() // a new L1 head may mean we have the data to not get an EOF again.
 		case newL1Safe := <-s.l1SafeSig:
