@@ -90,7 +90,7 @@ async function main() {
   execSync('direnv allow', { stdio: 'inherit' });
 
   const facetScriptPath = resolve(__dirname, 'CreateFacetContracts.s.sol');
-  execSync(`forge script -vvv ${facetScriptPath} --private-key ${process.env.PK} --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast`, { stdio: 'inherit' });
+  execSync(`forge script -vvv ${facetScriptPath} --private-key ${process.env.PK} --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast --resume`, { stdio: 'inherit' });
 
   await new Promise(resolve => setTimeout(resolve, 30000));
 
@@ -151,22 +151,21 @@ async function getEthTransaction(ethTxRaw: any): Promise<EthTransaction> {
       blockHash: ethReceiptRaw.blockHash,
       gasUsed: ethReceiptRaw.gasUsed,
       baseFee: blockDetails.baseFeePerGas!,
-      blockNumber: blockDetails.number
+      blockNumber: blockDetails.number,
+      blockTimestamp: blockDetails.timestamp
   };
 }
 
-let cachedL1BlockOfGenesisFacetBlock: bigint | null = null;
-
-async function getL1BlockOfGenesisFacetBlock(): Promise<bigint> {
-  if (cachedL1BlockOfGenesisFacetBlock !== null) {
-    return cachedL1BlockOfGenesisFacetBlock;
-  }
-
+async function getFacetBlockNumberForTimestamp(ethBlockTimestamp: bigint): Promise<bigint> {
   const firstAttributesTx = await publicClientL2.getTransaction({ blockNumber: 1n, index: 0 });
   const firstAttributes = decodeAttributesCalldata(firstAttributesTx.input);
-  cachedL1BlockOfGenesisFacetBlock = firstAttributes.number - 1n;
+  const facetBlock1EthTimestamp = firstAttributes.timestamp;
 
-  return cachedL1BlockOfGenesisFacetBlock;
+  const timeDifference = ethBlockTimestamp - facetBlock1EthTimestamp;
+
+  const facetBlockNumber = timeDifference / 12n + 1n;
+
+  return facetBlockNumber;
 }
 
 function calculateCalldataCost(hexString: `0x${string}`): bigint {
@@ -249,6 +248,7 @@ interface EthTransaction {
   baseFee: bigint;
   gasUsed: bigint;
   blockNumber: bigint;
+  blockTimestamp: bigint;
   // Add other necessary fields if needed
 }
 
@@ -324,8 +324,7 @@ class FacetTransaction {
       ethTx
     );
 
-    const l1BlockOfGenesisFacetBlock = await getL1BlockOfGenesisFacetBlock()
-    facetTx.facetBlockNumber = ethTx.blockNumber - l1BlockOfGenesisFacetBlock
+    facetTx.facetBlockNumber = await getFacetBlockNumberForTimestamp(ethTx.blockTimestamp)
 
     const currentFacetBlock = await publicClientL2.getBlock({ blockNumber: facetTx.facetBlockNumber })
     const currentAttributesTx = await publicClientL2.getTransaction({ blockNumber: facetTx.facetBlockNumber, index: 0 })

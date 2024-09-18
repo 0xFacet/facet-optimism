@@ -79,4 +79,20 @@ library LibFacet {
 
         require(success, "call failed");
     }
+
+    function createNonZeroByteString(uint256 length) public pure returns (bytes memory) {
+        require(length > 0, "Length must be greater than zero");
+
+        bytes memory result = new bytes(length);
+
+        assembly {
+            let ptr := add(result, 0x20) // Skip the length prefix
+            for { let i := 0 } lt(i, length) { i := add(i, 1) } {
+                mstore8(ptr, 0x01) // Store non-zero byte (0x01) at each position
+                ptr := add(ptr, 1)
+            }
+        }
+
+        return result;
+    }
 }
