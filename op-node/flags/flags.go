@@ -377,7 +377,7 @@ var (
 var requiredFlags = []cli.Flag{
 	L1NodeAddr,
 	L2EngineAddr,
-	L2EngineJWTSecret,
+	// L2EngineJWTSecret,
 }
 
 var optionalFlags = []cli.Flag{

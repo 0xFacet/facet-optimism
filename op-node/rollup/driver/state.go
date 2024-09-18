@@ -455,7 +455,7 @@ func (s *SyncDeriver) SyncStep() {
 		return
 	}
 
-	s.Emitter.Emit(engine.TryUpdateEngineEvent{})
+	// s.Emitter.Emit(engine.TryUpdateEngineEvent{})
 	if !drain() {
 		return
 	}
