@@ -123,6 +123,7 @@ func (st *StatusTracker) OnEvent(ev event.Event) bool {
 	case SetL2BlocksEvent:
 		st.data.UnsafeL2 = x.UnsafeL2
 		st.data.SafeL2 = x.SafeL2
+		st.data.PendingSafeL2 = x.SafeL2
 		st.data.FinalizedL2 = x.FinalizedL2
 		st.data.CurrentL1 = x.CurrentL1
 		st.log.Info("SetL2BlocksEvent", "unsafe", x.UnsafeL2, "safe", x.SafeL2, "finalized", x.FinalizedL2, "CurrentL1", x.CurrentL1)
