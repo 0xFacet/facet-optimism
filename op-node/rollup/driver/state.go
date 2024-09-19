@@ -258,16 +258,28 @@ func (s *Driver) eventLoop() {
 			}
 		case newL1Head := <-s.l1HeadSig:
 			result, err := sync.CurrentHeads(s.driverCtx, s.Config, s.L2)
-
 			if err != nil {
 				s.log.Error("Failed to find L2 heads", "err", err)
-			} else {
-				engine.ForceEngineReset(s.Engine, engine.ForceEngineResetEvent{
-					Unsafe:    result.Unsafe,
-					Safe:      result.Safe,
-					Finalized: result.Finalized,
-				})
+				s.Emitter.Emit(rollup.ResetEvent{Err: fmt.Errorf("failed to find L2 heads: %w", err)})
+				return
 			}
+
+			s.log.Info("Successfully found L2 heads", "unsafe", result.Unsafe, "safe", result.Safe, "finalized", result.Finalized)
+
+			L1UnsafeHash := result.Unsafe.L1Origin.Hash
+			l1Block, err := s.L1.L1BlockRefByHash(s.driverCtx, L1UnsafeHash)
+			if err != nil {
+				s.log.Error("Failed to retrieve L1 block by hash", "hash", L1UnsafeHash, "err", err)
+				s.Emitter.Emit(rollup.ResetEvent{Err: fmt.Errorf("failed to retrieve L1 block by hash: %w", err)})
+				return
+			}
+
+			s.Emitter.Emit(status.SetL2BlocksEvent{
+				UnsafeL2:    result.Unsafe,
+				SafeL2:      result.Safe,
+				FinalizedL2: result.Finalized,
+				CurrentL1:   l1Block,
+			})
 
 			s.Emitter.Emit(status.L1UnsafeEvent{L1Unsafe: newL1Head})
 			reqStep() // a new L1 head may mean we have the data to not get an EOF again.

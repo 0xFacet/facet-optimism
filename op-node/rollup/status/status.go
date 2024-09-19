@@ -14,6 +14,17 @@ import (
 	"github.com/ethereum-optimism/optimism/op-service/eth"
 )
 
+type SetL2BlocksEvent struct {
+	UnsafeL2    eth.L2BlockRef
+	SafeL2      eth.L2BlockRef
+	FinalizedL2 eth.L2BlockRef
+	CurrentL1   eth.L1BlockRef
+}
+
+func (ev SetL2BlocksEvent) String() string {
+	return "set-l2-blocks"
+}
+
 type L1UnsafeEvent struct {
 	L1Unsafe eth.L1BlockRef
 }
@@ -63,14 +74,14 @@ func (st *StatusTracker) OnEvent(ev event.Event) bool {
 
 	switch x := ev.(type) {
 	case engine.ForkchoiceUpdateEvent:
-		st.data.UnsafeL2 = x.UnsafeL2Head
-		st.data.SafeL2 = x.SafeL2Head
-		st.data.FinalizedL2 = x.FinalizedL2Head
+		// st.data.UnsafeL2 = x.UnsafeL2Head
+		// st.data.SafeL2 = x.SafeL2Head
+		// st.data.FinalizedL2 = x.FinalizedL2Head
 	case engine.PendingSafeUpdateEvent:
-		st.data.UnsafeL2 = x.Unsafe
-		st.data.PendingSafeL2 = x.PendingSafe
+		// st.data.UnsafeL2 = x.Unsafe
+		// st.data.PendingSafeL2 = x.PendingSafe
 	case derive.DeriverL1StatusEvent:
-		st.data.CurrentL1 = x.Origin
+		// st.data.CurrentL1 = x.Origin
 	case L1UnsafeEvent:
 		st.metrics.RecordL1Ref("l1_head", x.L1Unsafe)
 		// We don't need to do anything if the head hasn't changed.
@@ -106,9 +117,15 @@ func (st *StatusTracker) OnEvent(ev event.Event) bool {
 		st.data.SafeL2 = eth.L2BlockRef{}
 		st.data.CurrentL1 = eth.L1BlockRef{}
 	case engine.EngineResetConfirmedEvent:
-		st.data.UnsafeL2 = x.Unsafe
-		st.data.SafeL2 = x.Safe
-		st.data.FinalizedL2 = x.Finalized
+		// st.data.UnsafeL2 = x.Unsafe
+		// st.data.SafeL2 = x.Safe
+		// st.data.FinalizedL2 = x.Finalized
+	case SetL2BlocksEvent:
+		st.data.UnsafeL2 = x.UnsafeL2
+		st.data.SafeL2 = x.SafeL2
+		st.data.FinalizedL2 = x.FinalizedL2
+		st.data.CurrentL1 = x.CurrentL1
+		st.log.Info("SetL2BlocksEvent", "unsafe", x.UnsafeL2, "safe", x.SafeL2, "finalized", x.FinalizedL2, "CurrentL1", x.CurrentL1)
 	default: // other events do not affect the sync status
 		return false
 	}
