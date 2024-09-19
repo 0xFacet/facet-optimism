@@ -1,138 +1,186 @@
-<div align="center">
-  <br />
-  <br />
-  <a href="https://optimism.io"><img alt="Optimism" src="https://raw.githubusercontent.com/ethereum-optimism/brand-kit/main/assets/svg/OPTIMISM-R.svg" width=600></a>
-  <br />
-  <h3><a href="https://optimism.io">Optimism</a> is Ethereum, scaled.</h3>
-  <br />
-</div>
+# Welcome to `facet-optimism`!
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
+Facet Optimism provides tools to run an optimistic bridge on Facet using Optimism's technology. It includes modified versions of:
 
-- [What is Optimism?](#what-is-optimism)
-- [Documentation](#documentation)
-- [Specification](#specification)
-- [Community](#community)
-- [Contributing](#contributing)
-- [Security Policy and Vulnerability Reporting](#security-policy-and-vulnerability-reporting)
-- [Directory Structure](#directory-structure)
-- [Development and Release Process](#development-and-release-process)
-  - [Overview](#overview)
-  - [Production Releases](#production-releases)
-  - [Development branch](#development-branch)
-- [License](#license)
+1. Op L1 smart contracts
+2. Op L2 smart contracts
+3. `op-node`
+4. `op-proposer`
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+Unused components like op-challenger and op-batcher remain unmodified.
 
-## What is Optimism?
+## Getting started
 
-[Optimism](https://www.optimism.io/) is a project dedicated to scaling Ethereum's technology and expanding its ability to coordinate people from across the world to build effective decentralized economies and governance systems. The [Optimism Collective](https://www.optimism.io/vision) builds open-source software that powers scalable blockchains and aims to address key governance and economic challenges in the wider Ethereum ecosystem. Optimism operates on the principle of **impact=profit**, the idea that individuals who positively impact the Collective should be proportionally rewarded with profit. **Change the incentives and you change the world.**
 
-In this repository you'll find numerous core components of the OP Stack, the decentralized software stack maintained by the Optimism Collective that powers Optimism and forms the backbone of blockchains like [OP Mainnet](https://explorer.optimism.io/) and [Base](https://base.org). The OP Stack is designed to be aggressively open-source — you are welcome to explore, modify, and extend this code.
+Key points:
+1. This code is separate from the Facet protocol. It's a set of third-party tools for working with Facet.
+2. These tools are read-only for the Facet protocol. The `op-node` here only provides information about Facet and doesn't participate in L2 derivation.
 
-## Documentation
+## Installation Instructions
 
-- If you want to build on top of OP Mainnet, refer to the [Optimism Documentation](https://docs.optimism.io)
-- If you want to build your own OP Stack based blockchain, refer to the [OP Stack Guide](https://docs.optimism.io/stack/getting-started) and make sure to understand this repository's [Development and Release Process](#development-and-release-process)
+### Basic Setup
 
-## Specification
+1. Use the `facetv1.9.1` branch.
+2. Follow [Optimism's instructions](https://docs.optimism.io/builders/chain-operators/tutorials/create-l2-rollup) for setup.
+3. Use the provided `rollup-config.json`.
+4. Complete the `.envrc` file.
+5. Use `http://34.85.131.39:8545` for `OP_NODE_L2_ENGINE_RPC`.
 
-Detailed specifications for the OP Stack can be found within the [OP Stack Specs](https://github.com/ethereum-optimism/specs) repository.
+### Deploy the contracts
 
-## Community
+```bash
+cd packages/contracts-bedrock
+direnv allow
+npx ts-node scripts/setUpFacetBridges.ts
+```
 
-General discussion happens most frequently on the [Optimism discord](https://discord.gg/optimism).
-Governance discussion can also be found on the [Optimism Governance Forum](https://gov.optimism.io/).
+This will deploy and verify all the L1 and L2 contracts you need to bridge.
+It will also create an L2 token you can bridge into using a public L1 Test Token (`0x5589BB8228C07c4e15558875fAf2B859f678d129`).
 
-## Contributing
+### Start `op-node` and `op-proposer`
 
-The OP Stack is a collaborative project. By collaborating on free, open software and shared standards, the Optimism Collective aims to prevent siloed software development and rapidly accelerate the development of the Ethereum ecosystem. Come contribute, build the future, and redefine power, together.
+In one terminal: (Assuming you're still in `packages/contracts-bedrock`)
 
-[CONTRIBUTING.md](./CONTRIBUTING.md) contains a detailed explanation of the contributing process for this repository. Make sure to use the [Developer Quick Start](./CONTRIBUTING.md#development-quick-start) to properly set up your development environment.
+```
+cd ../..
+direnv allow
+./init_node.sh
+```
 
-[Good First Issues](https://github.com/ethereum-optimism/optimism/issues?q=is:open+is:issue+label:D-good-first-issue) are a great place to look for tasks to tackle if you're not sure where to start.
+In another terminal:
 
-## Security Policy and Vulnerability Reporting
+```
+./init_proposer.sh
+```
 
-Please refer to the canonical [Security Policy](https://github.com/ethereum-optimism/.github/blob/master/SECURITY.md) document for detailed information about how to report vulnerabilities in this codebase.
-Bounty hunters are encouraged to check out the [Optimism Immunefi bug bounty program](https://immunefi.com/bounty/optimism/).
-The Optimism Immunefi program offers up to $2,000,042 for in-scope critical vulnerabilities.
+Now you are posting L2 outputs to the L2 Output Oracle. Make sure your proposer address has enough testnet ether!
 
-## Directory Structure
+From here on out it's *exactly* the same as how you'd bridge with Optimism.
 
-<pre>
-├── <a href="./docs">docs</a>: A collection of documents including audits and post-mortems
-├── <a href="./op-batcher">op-batcher</a>: L2-Batch Submitter, submits bundles of batches to L1
-├── <a href="./op-bootnode">op-bootnode</a>: Standalone op-node discovery bootnode
-├── <a href="./op-chain-ops">op-chain-ops</a>: State surgery utilities
-├── <a href="./op-challenger">op-challenger</a>: Dispute game challenge agent
-├── <a href="./op-e2e">op-e2e</a>: End-to-End testing of all bedrock components in Go
-├── <a href="./op-node">op-node</a>: rollup consensus-layer client
-├── <a href="./op-preimage">op-preimage</a>: Go bindings for Preimage Oracle
-├── <a href="./op-program">op-program</a>: Fault proof program
-├── <a href="./op-proposer">op-proposer</a>: L2-Output Submitter, submits proposals to L1
-├── <a href="./op-service">op-service</a>: Common codebase utilities
-├── <a href="./op-ufm">op-ufm</a>: Simulations for monitoring end-to-end transaction latency
-├── <a href="./op-wheel">op-wheel</a>: Database utilities
-├── <a href="./ops">ops</a>: Various operational packages
-├── <a href="./ops-bedrock">ops-bedrock</a>: Bedrock devnet work
-├── <a href="./packages">packages</a>
-│   ├── <a href="./packages/contracts-bedrock">contracts-bedrock</a>: OP Stack smart contracts
-├── <a href="./proxyd">proxyd</a>: Configurable RPC request router and proxy
-├── <a href="./specs">specs</a>: Specs of the rollup starting at the Bedrock upgrade
-</pre>
+### Bridge a token into Facet
 
-## Development and Release Process
+1. Find your `createOptimismMintableERC20` transaction on the [Facet testnet explorer](https://cardinal.explorer.facet.org/).
+2. Edit `TestBridgeIn.s.sol` in `packages/contracts-bedrock/`.
+3. Run:
+   ```bash
+   forge script -vvv './scripts/TestBridgeIn.s.sol' --private-key $DEPLOY_ETH_KEY --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast --tc TestBridgeIn
+   ```
+4. Verify the balance increase on the L2 explorer.
 
-### Overview
+### Bridge a token out of Facet
 
-Please read this section carefully if you're planning to fork or make frequent PRs into this repository.
+1. Visit the `L2StandardBridge` page on the L2 explorer.
+2. Use the `bridgeERC20To` function.
+3. Submit the transaction.
+4. Wait for the output to be posted to the L2 Output Oracle (every 30 blocks by default).
 
-### Production Releases
+You can bridge out the same token you bridged in.
 
-Production releases are always tags, versioned as `<component-name>/v<semver>`.
-For example, an `op-node` release might be versioned as `op-node/v1.1.2`, and  smart contract releases might be versioned as `op-contracts/v1.0.0`.
-Release candidates are versioned in the format `op-node/v1.1.2-rc.1`.
-We always start with `rc.1` rather than `rc`.
+Now wait for the corresponding output to be posted to the L2 Output Oracle. The default configuration is for this to happen every 30 blocks.
 
-For contract releases, refer to the GitHub release notes for a given release which will list the specific contracts being released. Not all contracts are considered production ready within a release and many are under active development.
+### Prove and finalize the withdrawal
 
-Tags of the form `v<semver>`, such as `v1.1.4`, indicate releases of all Go code only, and **DO NOT** include smart contracts.
-This naming scheme is required by Golang.
-In the above list, this means these `v<semver` releases contain all `op-*` components and exclude all `contracts-*` components.
+Use the provided example script, adapting it as needed for your specific withdrawal.
 
-`op-geth` embeds upstream geth’s version inside its own version as follows: `vMAJOR.GETH_MAJOR GETH_MINOR GETH_PATCH.PATCH`.
-Basically, geth’s version is our minor version.
-For example if geth is at `v1.12.0`, the corresponding op-geth version would be `v1.101200.0`.
-Note that we pad out to three characters for the geth minor version and two characters for the geth patch version.
-Since we cannot left-pad with zeroes, the geth major version is not padded.
+```typescript
+async function main() {
+  const receipt = await publicClientL2.getTransactionReceipt({
+    hash: '0x3b1c2629aae57d61b326ea38d01d297a51600cca88bd3a8e5aaa8b9eedf753b0',
+  })
 
-See the [Node Software Releases](https://docs.optimism.io/builders/node-operators/releases) page of the documentation for more information about releases for the latest node components.
+  const [withdrawal] = getWithdrawals(receipt)
 
-The full set of components that have releases are:
 
-- `ci-builder`
-- `op-batcher`
-- `op-contracts`
-- `op-challenger`
-- `op-node`
-- `op-proposer`
+  const sourceId = 11155111
 
-All other components and packages should be considered development components only and do not have releases.
+  const optimism2 = /*#__PURE__*/ defineChain({
+    ...chainConfig,
+    id: 10,
+    name: 'OP Mainnet',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: ['https://mainnet.optimism.io'],
+      },
+    },
+    blockExplorers: {
+      default: {
+        name: 'Optimism Explorer',
+        url: 'https://optimistic.etherscan.io',
+        apiUrl: 'https://api-optimistic.etherscan.io/api',
+      },
+    },
+    contracts: {
+      ...chainConfig.contracts,
+      disputeGameFactory: {
+        [sourceId]: {
+          address: '0xe5965Ab5962eDc7477C8520243A95517CD252fA9',
+        },
+      },
+      l2OutputOracle: {
+        [sourceId]: {
+          address: '0x60cecA8aaDe7fbc8221BcFd8202BDb4c7774Fda5',
+        },
+      },
+      multicall3: {
+        address: '0xca11bde05977b3631167028862be2a173976ca11',
+        blockCreated: 4286263,
+      },
+      portal: {
+        [sourceId]: {
+          address: '0x95Af43232Bf5dBD3F3b844f446d5f874fd756B50',
+        },
+      },
+      l1StandardBridge: {
+        [sourceId]: {
+          address: '0xda187cDdF7F405518b9DD3dCf33016ecb9bb3C93',
+        },
+      },
+    },
+    sourceId,
+  })
 
-### Development branch
+  const output = await publicClientL1.getL2Output({
+    l2BlockNumber: receipt.blockNumber,
+    targetChain: optimism2 as any,
+  })
 
-The primary development branch is [`develop`](https://github.com/ethereum-optimism/optimism/tree/develop/).
-`develop` contains the most up-to-date software that remains backwards compatible with the latest experimental [network deployments](https://community.optimism.io/docs/useful-tools/networks/).
-If you're making a backwards compatible change, please direct your pull request towards `develop`.
+  console.log({output})
 
-**Changes to contracts within `packages/contracts-bedrock/src` are usually NOT considered backwards compatible.**
-Some exceptions to this rule exist for cases in which we absolutely must deploy some new contract after a tag has already been fully deployed.
-If you're changing or adding a contract and you're unsure about which branch to make a PR into, default to using a feature branch.
-Feature branches are typically used when there are conflicts between 2 projects touching the same code, to avoid conflicts from merging both into `develop`.
+  const args1 = await publicClientL2.buildProveWithdrawal({
+    output,
+    withdrawal
+  })
 
-## License
+  const args = {
+    ...args1,
+    authorizationList: [],
+    targetChain: optimism2
+  }
 
-All other files within this repository are licensed under the [MIT License](https://github.com/ethereum-optimism/optimism/blob/master/LICENSE) unless stated otherwise.
+  console.log({args})
+
+  const proveHash = await walletClientL1.proveWithdrawal(args as any)
+
+  const proveReceipt = await publicClientL1.waitForTransactionReceipt({
+    hash: proveHash
+  })
+
+  console.log({proveReceipt})
+
+  // Wait for the challenge period to end
+  await new Promise(resolve => setTimeout(resolve, 60000));
+
+  const finalizeHash = await walletClientL1.finalizeWithdrawal({
+    targetChain: optimism2,
+    withdrawal,
+  })
+
+  // Wait until the withdrawal is finalized.
+  const finalizeReceipt = await publicClientL1.waitForTransactionReceipt({
+    hash: finalizeHash
+  })
+
+  console.log(finalizeReceipt)
+}
+```
