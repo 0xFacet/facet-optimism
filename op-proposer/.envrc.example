@@ -1,4 +1,0 @@
-export L1_ETH_RPC=""
-export ROLLUP_RPC="http://localhost:9545"
-export L2_OUTPUT_ORACLE=""
-export PROPOSER_PRIVATE_KEY=""

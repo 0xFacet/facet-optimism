@@ -3,21 +3,20 @@
 ##################################################
 
 # Admin account
-export GS_ADMIN_ADDRESS=
-export GS_ADMIN_PRIVATE_KEY=
+export GS_ADMIN_ADDRESS="0x1234567890123456789012345678901234567890"
+export GS_ADMIN_PRIVATE_KEY="0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
 
 # Batcher account
-export GS_BATCHER_ADDRESS=
-export GS_BATCHER_PRIVATE_KEY=
+export GS_BATCHER_ADDRESS="0x2345678901234567890123456789012345678901"
+export GS_BATCHER_PRIVATE_KEY="0xbcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890a"
 
 # Proposer account
-export GS_PROPOSER_ADDRESS=
-export GS_PROPOSER_PRIVATE_KEY=
+export GS_PROPOSER_ADDRESS="0x3456789012345678901234567890123456789012"
+export GS_PROPOSER_PRIVATE_KEY="0xcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab"
 
 # Sequencer account
-export GS_SEQUENCER_ADDRESS=
-export GS_SEQUENCER_PRIVATE_KEY=
-
+export GS_SEQUENCER_ADDRESS="0x4567890123456789012345678901234567890123"
+export GS_SEQUENCER_PRIVATE_KEY="0xdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abc"
 
 ##################################################
 #                Chain Information               #
@@ -28,8 +27,8 @@ export L1_CHAIN_ID=11155111
 export L1_BLOCK_TIME=12
 
 # L2 chain information
-export L2_CHAIN_ID=42069
-export L2_BLOCK_TIME=2
+export L2_CHAIN_ID=16436858
+export L2_BLOCK_TIME=12
 
 ##################################################
 #              op-node Configuration             #
@@ -38,14 +37,22 @@ export L2_BLOCK_TIME=2
 # The kind of RPC provider, used to inform optimal transactions receipts
 # fetching. Valid options: alchemy, quicknode, infura, parity, nethermind,
 # debug_geth, erigon, basic, any.
-export L1_RPC_KIND=
+export L1_RPC_KIND="example_provider"
+export OP_NODE_L2_ENGINE_RPC="http://example-l2-engine-rpc.com"
+export OP_NODE_L1_ETH_RPC="https://example-l1-eth-rpc.com"
+
+export OP_PROPOSER_ROLLUP_RPC="http://localhost:8545"
+export OP_PROPOSER_L1_ETH_RPC="$OP_NODE_L1_ETH_RPC"
+
+export OP_PROPOSER_PRIVATE_KEY="$GS_PROPOSER_PRIVATE_KEY"
 
 ##################################################
 #               Contract Deployment              #
 ##################################################
 
 # RPC URL for the L1 network to interact with
-export L1_RPC_URL=
+export L1_RPC_URL="$OP_NODE_L1_ETH_RPC"
+export DEPLOY_ETH_RPC_URL="$OP_NODE_L1_ETH_RPC"
 
 # Salt used via CREATE2 to determine implementation addresses
 # NOTE: If you want to deploy contracts from scratch you MUST reload this
@@ -54,15 +61,19 @@ export L1_RPC_URL=
 export IMPL_SALT=$(openssl rand -hex 32)
 
 # Name for the deployed network
-export DEPLOYMENT_CONTEXT=getting-started
+export DEPLOYMENT_CONTEXT="example-testnet"
 
 # Optional Tenderly details for simulation link during deployment
-export TENDERLY_PROJECT=
-export TENDERLY_USERNAME=
+export TENDERLY_PROJECT="example_project"
+export TENDERLY_USERNAME="example_user"
 
 # Optional Etherscan API key for contract verification
-export ETHERSCAN_API_KEY=
+export ETHERSCAN_API_KEY="EXAMPLE1234567890ABCDEFGHIJKLMNOPQRST"
 
 # Private key to use for contract deployments, you don't need to worry about
 # this for the Getting Started guide.
-export PRIVATE_KEY=
+export PRIVATE_KEY="0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+export DEPLOY_PRIVATE_KEY="0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+
+export DEPLOY_CONFIG_PATH='/path/to/your/deploy-config/example-config.json'
+export DEPLOYMENT_OUTFILE="/path/to/your/deployments/example-artifact.json"
