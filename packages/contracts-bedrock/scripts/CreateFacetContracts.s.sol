@@ -9,7 +9,7 @@ import { LibFacet } from "../src/libraries/LibFacet.sol";
 import { LibRLP } from "../src/libraries/LibRLP.sol";
 import { JSONParserLib } from "@solady/utils/JSONParserLib.sol";
 
-contract PrintCreationCode is Script {
+contract CreateFacetContracts is Script {
     using LibRLP for LibRLP.List;
 
     modifier broadcast() {
