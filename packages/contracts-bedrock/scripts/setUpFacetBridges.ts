@@ -90,7 +90,7 @@ async function main() {
   execSync('direnv allow', { stdio: 'inherit' });
 
   const facetScriptPath = resolve(__dirname, 'CreateFacetContracts.s.sol');
-  execSync(`forge script -vvv ${facetScriptPath} --private-key ${process.env.PK} --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast --resume`, { stdio: 'inherit' });
+  execSync(`forge script -vvv ${facetScriptPath} --private-key ${process.env.PK} --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast`, { stdio: 'inherit' });
 
   await new Promise(resolve => setTimeout(resolve, 30000));
 
