@@ -8,8 +8,12 @@ import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableE
 import { LibFacet } from "../src/libraries/LibFacet.sol";
 import { LibRLP } from "../src/libraries/LibRLP.sol";
 import { JSONParserLib } from "@solady/utils/JSONParserLib.sol";
+import { Proxy } from "src/universal/Proxy.sol";
+import { EIP1967Helper } from "test/mocks/EIP1967Helper.sol";
+import { Artifacts, Deployment } from "./Artifacts.s.sol";
+import { ForgeArtifacts } from "scripts/libraries/ForgeArtifacts.sol";
 
-contract CreateFacetContracts is Script {
+contract CreateFacetContracts is Script, Artifacts {
     using LibRLP for LibRLP.List;
 
     modifier broadcast() {
@@ -20,19 +24,67 @@ contract CreateFacetContracts is Script {
 
     uint256 deployerNonce;
 
-    function run() external {
+    function setUp() public virtual override {
+        vm.setEnv("DEPLOYMENT_OUTFILE", vm.envString("L2_DEPLOYMENT_OUTFILE"));
+        Artifacts.setUp();
         deployerNonce = getL2Nonce();
-        createContracts();
+    }
+
+    function run() external broadcast {
+        deployERC1967Proxy("L2CrossDomainMessengerProxy");
+        deployERC1967Proxy("L2StandardBridgeProxy");
+        deployERC1967Proxy("OptimismMintableERC20FactoryProxy");
+
+        deployImplementation("L2CrossDomainMessenger", type(L2CrossDomainMessenger).creationCode);
+        deployImplementation("L2StandardBridge", type(L2StandardBridge).creationCode);
+        deployImplementation("OptimismMintableERC20Factory", type(OptimismMintableERC20Factory).creationCode);
     }
 
     function compAddr(address deployer, uint256 nonce) pure internal returns (address) {
         return address(uint160(uint256(keccak256(LibRLP.p(deployer).p(nonce).p('facet').encode()))));
     }
 
-    function getNextContractAddressAndIncrementNonce() internal returns (address) {
+    function nextAddress() internal returns (address) {
         address addr = compAddr(msg.sender, deployerNonce);
         deployerNonce++;
         return addr;
+    }
+
+    function deployImplementation(string memory _name, bytes memory _creationCode) public returns (address addr_) {
+        addr_ = nextAddress();
+        LibFacet.sendFacetTransaction({
+            gasLimit: 5_000_000,
+            data: _creationCode
+        });
+        save(_name, addr_);
+        console.log("   at %s", addr_);
+    }
+
+    function deployERC1967Proxy(string memory _name) public returns (address addr_) {
+        addr_ = deployERC1967ProxyWithOwner(_name, msg.sender);
+    }
+
+    function deployERC1967ProxyWithOwner(
+        string memory _name,
+        address _proxyOwner
+    )
+        public
+        returns (address addr_)
+    {
+        console.log(string.concat("Deploying ERC1967 proxy for ", _name));
+
+        addr_ = nextAddress();
+
+        LibFacet.sendFacetTransaction({
+            gasLimit: 5_000_000,
+            data: abi.encodePacked(
+                type(Proxy).creationCode,
+                abi.encode(_proxyOwner)
+            )
+        });
+
+        save(_name, addr_);
+        console.log("   at %s", addr_);
     }
 
     function getL2Nonce() internal returns (uint256) {
@@ -70,27 +122,4 @@ contract CreateFacetContracts is Script {
         return nonce;
     }
 
-    function createContracts() internal broadcast {
-        console.log("First contract address:", getNextContractAddressAndIncrementNonce());
-        console.log("Second contract address:", getNextContractAddressAndIncrementNonce());
-        console.log("Third contract address:", getNextContractAddressAndIncrementNonce());
-
-        LibFacet.sendFacetTransaction({
-            value: 0,
-            gasLimit: 5_000_000,
-            data: type(L2CrossDomainMessenger).creationCode
-        });
-
-        LibFacet.sendFacetTransaction({
-            value: 0,
-            gasLimit: 5_000_000,
-            data: type(L2StandardBridge).creationCode
-        });
-
-        LibFacet.sendFacetTransaction({
-            value: 0,
-            gasLimit: 5_000_000,
-            data: type(OptimismMintableERC20Factory).creationCode
-        });
-    }
 }

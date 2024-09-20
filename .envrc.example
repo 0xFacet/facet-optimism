@@ -76,4 +76,5 @@ export PRIVATE_KEY="0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234
 export DEPLOY_PRIVATE_KEY="0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
 
 export DEPLOY_CONFIG_PATH='/path/to/your/deploy-config/example-config.json'
-export DEPLOYMENT_OUTFILE="/path/to/your/deployments/example-artifact.json"
+export DEPLOYMENT_OUTFILE="/path/to/your/deployments/l1-artifacts.json"
+export L2_DEPLOYMENT_OUTFILE="/path/to/your/deployments/l2-artifacts.json"

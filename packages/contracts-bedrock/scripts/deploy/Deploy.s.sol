@@ -1117,7 +1117,7 @@ contract Deploy is Deployer {
                     L1CrossDomainMessenger(l1CrossDomainMessengerProxy),
                     SuperchainConfig(superchainConfigProxy),
                     SystemConfig(systemConfigProxy),
-                    StandardBridge(payable(vm.envAddress("L2_STANDARD_BRIDGE")))
+                    StandardBridge(payable(vm.envAddress("L2StandardBridge")))
                 )
             )
         });
@@ -1216,7 +1216,7 @@ contract Deploy is Deployer {
                     SuperchainConfig(superchainConfigProxy),
                     OptimismPortal(payable(optimismPortalProxy)),
                     SystemConfig(systemConfigProxy),
-                    L2CrossDomainMessenger(vm.envAddress("L2_CROSS_DOMAIN_MESSENGER"))
+                    L2CrossDomainMessenger(vm.envAddress("L2CrossDomainMessenger"))
                 )
             )
         });

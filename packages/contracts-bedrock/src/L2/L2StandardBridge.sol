@@ -76,12 +76,6 @@ contract L2StandardBridge is StandardBridge, ISemver {
         });
     }
 
-    // TODO: Permissioned function to set the other messenger and other bridge
-    function setMessengerAndOtherBridge(CrossDomainMessenger _messenger, StandardBridge _otherBridge) public {
-        messenger = _messenger;
-        otherBridge = _otherBridge;
-    }
-
     /// @notice Allows EOAs to bridge ETH by sending directly to the bridge.
     receive() external payable override onlyEOA {
         _initiateWithdrawal(

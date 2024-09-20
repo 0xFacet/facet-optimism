@@ -48,6 +48,41 @@ library LibFacet {
     }
 
     function sendFacetTransaction(
+        bytes memory data,
+        address to,
+        uint256 maxFeePerGas,
+        uint256 gasLimit
+    ) internal {
+        sendFacetTransaction(to, 0, maxFeePerGas, gasLimit, data);
+    }
+
+    // Overload for sendFacetTransaction without 'to' and without value
+    function sendFacetTransaction(
+        bytes memory data,
+        uint256 maxFeePerGas,
+        uint256 gasLimit
+    ) internal {
+        sendFacetTransaction(0, maxFeePerGas, gasLimit, data);
+    }
+
+    // Overload for sendFacetTransaction without 'to', 'value', and 'maxFeePerGas'
+    function sendFacetTransaction(
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        sendFacetTransaction(bytes(''), 0, 0, gasLimit, data);
+    }
+
+    // Overload for sendFacetTransaction with address, without value and maxFeePerGas
+    function sendFacetTransaction(
+        address to,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        sendFacetTransaction(to, 0, gasLimit, data);
+    }
+
+    function sendFacetTransaction(
         bytes memory to,
         uint256 value,
         uint256 maxFeePerGas,
@@ -74,25 +109,8 @@ library LibFacet {
         list.p(data);
 
         bytes memory out = abi.encodePacked(facetTxType, list.encode());
-        // console2.log(LibString.toHexString(out));
         (bool success,) = facetInboxAddress.call(out);
 
         require(success, "call failed");
-    }
-
-    function createNonZeroByteString(uint256 length) public pure returns (bytes memory) {
-        require(length > 0, "Length must be greater than zero");
-
-        bytes memory result = new bytes(length);
-
-        assembly {
-            let ptr := add(result, 0x20) // Skip the length prefix
-            for { let i := 0 } lt(i, length) { i := add(i, 1) } {
-                mstore8(ptr, 0x01) // Store non-zero byte (0x01) at each position
-                ptr := add(ptr, 1)
-            }
-        }
-
-        return result;
     }
 }

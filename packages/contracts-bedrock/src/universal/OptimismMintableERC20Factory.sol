@@ -62,11 +62,6 @@ contract OptimismMintableERC20Factory is ISemver, Initializable, IOptimismERC20F
         bridge = _bridge;
     }
 
-    // TODO: Permissioned function to set the bridge
-    function setBridge(address _bridge) public {
-        bridge = _bridge;
-    }
-
     /// @notice Getter function for the address of the StandardBridge on this chain.
     ///         Public getter is legacy and will be removed in the future. Use `bridge` instead.
     /// @return Address of the StandardBridge on this chain.

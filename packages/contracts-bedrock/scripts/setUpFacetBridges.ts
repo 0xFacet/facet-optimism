@@ -32,71 +32,46 @@ function writeContractAddressesToJson(addresses: { [key: string]: string }) {
   console.log(`Contract addresses written to ${filePath}`);
 }
 
-async function processAndVerifyContracts(data: any) {
-  const filePaths = {
+async function processAndVerifyContracts() {
+  const filePaths: { [key: string]: string } = {
     L2CrossDomainMessenger: resolve(__dirname, '../src/L2/L2CrossDomainMessenger.sol'),
     L2StandardBridge: resolve(__dirname, '../src/L2/L2StandardBridge.sol'),
-    OptimismMintableERC20Factory: resolve(__dirname, '../src/universal/OptimismMintableERC20Factory.sol')
+    OptimismMintableERC20Factory: resolve(__dirname, '../src/universal/OptimismMintableERC20Factory.sol'),
+    Proxy: resolve(__dirname, '../src/universal/Proxy.sol')
   };
 
-  const envVarNames = [
-    'L2_CROSS_DOMAIN_MESSENGER',
-    'L2_STANDARD_BRIDGE',
-    'OPTIMISM_MINTABLE_ERC20_FACTORY'
+  const artifactsPath = resolve(__dirname, '../deployments/l2-artifacts.json');
+  const artifacts = JSON.parse(readFileSync(artifactsPath, 'utf8'));
+
+  const contractNames = [
+    'L2CrossDomainMessenger',
+    'L2StandardBridge',
+    'OptimismMintableERC20Factory'
   ];
 
-  const contractAddresses: { [key: string]: string } = {};
+  for (const contractName of contractNames) {
+    const implementationAddress = artifacts[contractName];
+    const proxyAddress = artifacts[`${contractName}Proxy`];
 
-  const facetContracts = await Promise.all(data.transactions.map(async (tx: any, index: number) => {
-    const ethTx = await getEthTransaction(tx);
-    const facetTx = await FacetTransaction.fromEthTransaction(ethTx);
-    const contractAddress = await facetTx.getCreatedContractAddress();
+    // Verify the implementation contract
+    verifyContract(`forge verify-contract --rpc-url https://cardinal.facet.org/ --verifier blockscout --verifier-url 'https://cardinal.explorer.facet.org/api/' ${implementationAddress} ${filePaths[contractName]}:${contractName}`);
 
-    // Determine the contract name based on the index or other logic
-    let contractName: keyof typeof filePaths;
-    switch (index) {
-      case 0:
-        contractName = 'L2CrossDomainMessenger';
-        break;
-      case 1:
-        contractName = 'L2StandardBridge';
-        break;
-      case 2:
-        contractName = 'OptimismMintableERC20Factory';
-        break;
-      default:
-        throw new Error('Unexpected contract index');
-    }
+    // Verify the proxy contract
+    verifyContract(`forge verify-contract --rpc-url https://cardinal.facet.org/ --verifier blockscout --verifier-url 'https://cardinal.explorer.facet.org/api/' ${proxyAddress} ${filePaths['Proxy']}:Proxy`);
 
-    // Verify the contract
-    verifyContract(`forge verify-contract --rpc-url https://cardinal.facet.org/ --verifier blockscout --verifier-url 'https://cardinal.explorer.facet.org/api/' ${contractAddress} ${filePaths[contractName]}:${contractName}`);
-
-    // Set the environment variable
-    process.env[envVarNames[index]] = contractAddress;
-
-    // Store the contract address
-    contractAddresses[envVarNames[index]] = contractAddress;
-
-    return contractAddress;
-  }));
-
-  // Write contract addresses to JSON file
-  writeContractAddressesToJson(contractAddresses);
-
-  return facetContracts;
+    process.env[contractName] = proxyAddress;
+  }
 }
 
 async function main() {
   execSync('direnv allow', { stdio: 'inherit' });
 
   const facetScriptPath = resolve(__dirname, 'CreateFacetContracts.s.sol');
-  execSync(`forge script -vvv ${facetScriptPath} --private-key ${process.env.PK} --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast`, { stdio: 'inherit' });
+  execSync(`forge script -vvv ${facetScriptPath} --private-key ${process.env.PK} --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast --slow`, { stdio: 'inherit' });
 
   await new Promise(resolve => setTimeout(resolve, 30000));
 
-  const data = getLatestFoundryOutput('CreateFacetContracts');
-  await processAndVerifyContracts(data);
-
+  await processAndVerifyContracts();
   const deployScriptPath = resolve(__dirname, 'deploy/Deploy.s.sol');
 
   execSync(`forge script -vvv ${deployScriptPath} --private-key ${process.env.PK} --rpc-url "$DEPLOY_ETH_RPC_URL" --broadcast --slow`, { stdio: 'inherit' });
@@ -119,8 +94,8 @@ async function main() {
     verifyContract(`forge verify-contract --chain 11155111 --compiler-version 0.8.15 ${contractAddress} ${filePath}:${contractName}`)
   })
 
-  process.env.L1_CROSS_DOMAIN_MESSENGER = artifacts.L1CrossDomainMessengerProxy;
-  process.env.L1_STANDARD_BRIDGE = artifacts.L1StandardBridgeProxy;
+  process.env.L1CrossDomainMessenger = artifacts.L1CrossDomainMessengerProxy;
+  process.env.L1StandardBridge = artifacts.L1StandardBridgeProxy;
 
   const initScriptPath = resolve(__dirname, 'InitFacetContracts.s.sol');
 
@@ -128,7 +103,7 @@ async function main() {
 }
 
 function getLatestArtifacts() {
-  const filePath = resolve(__dirname, `../deployments/artifact.json`);
+  const filePath = resolve(__dirname, process.env.DEPLOYMENT_OUTFILE!);
   const jsonData = readFileSync(filePath, 'utf-8');
   return JSON.parse(jsonData);
 }
