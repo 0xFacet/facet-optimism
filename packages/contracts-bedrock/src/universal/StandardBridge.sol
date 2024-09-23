@@ -11,6 +11,7 @@ import { CrossDomainMessenger } from "src/universal/CrossDomainMessenger.sol";
 import { OptimismMintableERC20 } from "src/universal/OptimismMintableERC20.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Constants } from "src/libraries/Constants.sol";
+import { AddressAliasHelper } from "src/vendor/AddressAliasHelper.sol";
 
 import { LibFacet } from "src/libraries/LibFacet.sol";
 
@@ -97,6 +98,24 @@ abstract contract StandardBridge is Initializable {
         bytes extraData
     );
 
+    event ERC20DepositReplayed(
+        bytes32 indexed depositId,
+        bytes payload
+    );
+
+    struct BridgeStorage {
+        mapping(bytes32 => bytes32) depositHashes;
+        mapping(bytes32 => bool) finalizedDeposits;
+        uint256 depositIdNonce;
+    }
+
+    function s() internal pure returns (BridgeStorage storage cs) {
+        bytes32 position = keccak256("BridgeStorage.contract.storage");
+        assembly {
+           cs.slot := position
+        }
+    }
+
     /// @notice Only allow EOAs to call the functions. Note that this is not safe against contracts
     ///         calling code within their constructors, but also doesn't really matter since we're
     ///         just trying to prevent users accidentally depositing with smart contract wallets.
@@ -112,7 +131,7 @@ abstract contract StandardBridge is Initializable {
     }
 
     /// @notice Ensures that the caller is a cross-chain message from the other bridge.
-    modifier onlyOtherBridge() {
+    modifier onlyOtherBridgeOrSelf() {
         if (onL1()) {
             require(
                 msg.sender == address(messenger) && messenger.xDomainMessageSender() == address(otherBridge),
@@ -120,7 +139,8 @@ abstract contract StandardBridge is Initializable {
             );
         } else {
             require(
-                msg.sender == address(otherBridge),
+                msg.sender == address(this) ||
+                msg.sender == AddressAliasHelper.undoL1ToL2Alias(address(otherBridge)),
                 "StandardBridge: function can only be called from the L1 bridge"
             );
         }
@@ -264,7 +284,7 @@ abstract contract StandardBridge is Initializable {
     )
         public
         payable
-        onlyOtherBridge
+        onlyOtherBridgeOrSelf
     {
         require(paused() == false, "StandardBridge: paused");
         require(isCustomGasToken() == false, "StandardBridge: cannot bridge ETH with custom gas token");
@@ -278,6 +298,57 @@ abstract contract StandardBridge is Initializable {
 
         bool success = SafeCall.call(_to, gasleft(), _amount, hex"");
         require(success, "StandardBridge: ETH transfer failed");
+    }
+
+    function replayERC20Deposit(bytes32 _depositId, bytes memory _payload) public {
+        require(onL1(), "StandardBridge: only callable on L1");
+
+        bytes32 depositHash = s().depositHashes[_depositId];
+
+        require(_depositId != bytes32(0), "StandardBridge: deposit not found");
+        require(depositHash != bytes32(0), "StandardBridge: deposit not found");
+        require(depositHash == keccak256(_payload), "StandardBridge: invalid deposit payload");
+
+        LibFacet.sendFacetTransaction({
+            value: 0,
+            gasLimit: 500_000,
+            to: address(otherBridge),
+            data: abi.encodeWithSelector(
+                this.finalizeBridgeERC20Replayable.selector,
+                _depositId,
+                _payload
+            )
+        });
+
+        emit ERC20DepositReplayed(_depositId, _payload);
+    }
+
+    function finalizeBridgeERC20Replayable(
+        bytes32 _depositId,
+        bytes calldata finalizeBridgeERC20Data
+    ) public onlyOtherBridgeOrSelf {
+        require(onL2(), "StandardBridge: only callable on L2");
+        require(!s().finalizedDeposits[_depositId], "StandardBridge: deposit already finalized");
+        s().finalizedDeposits[_depositId] = true;
+
+        (
+            address _localToken,
+            address _remoteToken,
+            address _from,
+            address _to,
+            uint256 _amount,
+            bytes memory _extraData
+        ) = abi.decode(finalizeBridgeERC20Data, (address, address, address, address, uint256, bytes));
+
+        // Call the non-replayable finalizeBridgeERC20 function
+        finalizeBridgeERC20(
+            _localToken,
+            _remoteToken,
+            _from,
+            _to,
+            _amount,
+            _extraData
+        );
     }
 
     /// @notice Finalizes an ERC20 bridge on this chain. Can only be triggered by the other
@@ -296,10 +367,10 @@ abstract contract StandardBridge is Initializable {
         address _from,
         address _to,
         uint256 _amount,
-        bytes calldata _extraData
+        bytes memory _extraData
     )
         public
-        onlyOtherBridge
+        onlyOtherBridgeOrSelf
     {
         require(paused() == false, "StandardBridge: paused");
         if (_isOptimismMintableERC20(_localToken)) {
@@ -317,6 +388,10 @@ abstract contract StandardBridge is Initializable {
         // Emit the correct events. By default this will be ERC20BridgeFinalized, but child
         // contracts may override this function in order to emit legacy events as well.
         _emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
+    }
+
+    function generateDepositId() internal returns (bytes32) {
+        return keccak256(abi.encode(address(this), msg.sender, s().depositIdNonce++));
     }
 
     /// @notice Initiates a bridge of ETH through the CrossDomainMessenger.
@@ -389,23 +464,24 @@ abstract contract StandardBridge is Initializable {
         _emitERC20BridgeInitiated(_localToken, _remoteToken, _from, _to, _amount, _extraData);
 
         if (onL1()) {
-            LibFacet.sendFacetTransaction({
-                value: 0,
-                gasLimit: 500_000,
-                to: address(otherBridge),
-                data: abi.encodeWithSelector(
-                    this.finalizeBridgeERC20.selector,
-                    // Because this call will be executed on the remote chain, we reverse the order of
-                    // the remote and local token addresses relative to their order in the
-                    // finalizeBridgeERC20 function.
-                    _remoteToken,
-                    _localToken,
-                    _from,
-                    _to,
-                    _amount,
-                    _extraData
-                )
-            });
+            bytes32 depositId = generateDepositId();
+
+            bytes memory payload = abi.encodeWithSelector(
+                this.finalizeBridgeERC20.selector,
+                // Because this call will be executed on the remote chain, we reverse the order of
+                // the remote and local token addresses relative to their order in the
+                // finalizeBridgeERC20 function.
+                _remoteToken,
+                _localToken,
+                _from,
+                _to,
+                _amount,
+                _extraData
+            );
+
+            s().depositHashes[depositId] = keccak256(payload);
+
+            replayERC20Deposit(depositId, payload);
         } else {
             messenger.sendMessage({
                 _target: address(otherBridge),
