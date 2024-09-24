@@ -8,7 +8,7 @@ import "forge-std/console2.sol";
 library LibFacet {
     using LibRLP for LibRLP.List;
 
-    address constant facetInboxAddress = 0x00000000000000000000000000000000000FacE7;
+    bytes32 constant facetEventSignature = 0x00000000000000000000000000000000000000000000000000000000000face7;
     uint8 constant facetTxType = 70;
 
     function sendFacetTransaction(
@@ -109,8 +109,9 @@ library LibFacet {
         list.p(data);
 
         bytes memory out = abi.encodePacked(facetTxType, list.encode());
-        (bool success,) = facetInboxAddress.call(out);
 
-        require(success, "call failed");
+        assembly {
+            log1(add(out, 32), mload(out), facetEventSignature)
+        }
     }
 }
