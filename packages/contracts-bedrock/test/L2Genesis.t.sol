@@ -2,7 +2,7 @@
 pragma solidity 0.8.15;
 
 import { Test } from "forge-std/Test.sol";
-import { L2Genesis, L1Dependencies } from "scripts/L2Genesis.s.sol";
+import { L2Genesis } from "scripts/L2Genesis.s.sol";
 import { Predeploys } from "src/libraries/Predeploys.sol";
 import { Constants } from "src/libraries/Constants.sol";
 import { Process } from "scripts/libraries/Process.sol";
@@ -169,19 +169,10 @@ contract L2GenesisTest is Test {
         withTempDump(_test_allocs_size);
     }
 
-    /// @notice Creates mock L1Dependencies for testing purposes.
-    function _dummyL1Deps() internal pure returns (L1Dependencies memory _deps) {
-        return L1Dependencies({
-            l1CrossDomainMessengerProxy: payable(address(0x100000)),
-            l1StandardBridgeProxy: payable(address(0x100001)),
-            l1ERC721BridgeProxy: payable(address(0x100002))
-        });
-    }
-
     /// @notice Tests the number of accounts in the genesis setup
     function _test_allocs_size(string memory _path) internal {
         genesis.cfg().setFundDevAccounts(false);
-        genesis.runWithLatestLocal(_dummyL1Deps());
+        genesis.runWithLatestLocal();
         genesis.writeGenesisAllocs(_path);
 
         uint256 expected = 0;

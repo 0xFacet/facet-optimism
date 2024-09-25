@@ -27,7 +27,7 @@ import { L1CrossDomainMessenger } from "src/L1/L1CrossDomainMessenger.sol";
 import { DeployConfig } from "scripts/deploy/DeployConfig.s.sol";
 import { Deploy } from "scripts/deploy/Deploy.s.sol";
 import { Fork, LATEST_FORK } from "scripts/libraries/Config.sol";
-import { L2Genesis, L1Dependencies } from "scripts/L2Genesis.s.sol";
+import { L2Genesis } from "scripts/L2Genesis.s.sol";
 import { OutputMode, Fork, ForkUtils } from "scripts/libraries/Config.sol";
 import { L2OutputOracle } from "src/L1/L2OutputOracle.sol";
 import { ProtocolVersions } from "src/L1/ProtocolVersions.sol";
@@ -186,12 +186,7 @@ contract Setup {
         console.log("Setup: creating L2 genesis with fork %s", l2Fork.toString());
         l2Genesis.runWithOptions(
             OutputMode.NONE,
-            l2Fork,
-            L1Dependencies({
-                l1CrossDomainMessengerProxy: payable(address(l1CrossDomainMessenger)),
-                l1StandardBridgeProxy: payable(address(l1StandardBridge)),
-                l1ERC721BridgeProxy: payable(address(l1ERC721Bridge))
-            })
+            l2Fork
         );
 
         // Set the governance token's owner to be the final system owner
