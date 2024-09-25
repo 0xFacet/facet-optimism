@@ -24,7 +24,7 @@ Key points:
 2. Follow [Optimism's instructions](https://docs.optimism.io/builders/chain-operators/tutorials/create-l2-rollup) for setup.
 3. Use the provided `rollup-config.json`.
 4. Complete the `.envrc` file.
-5. Use `http://34.85.131.39:8545` for `OP_NODE_L2_ENGINE_RPC`.
+5. Use `https://sepolia.facet.org` for `OP_NODE_L2_ENGINE_RPC`.
 
 ### Deploy the contracts
 

@@ -13,6 +13,7 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { Constants } from "src/libraries/Constants.sol";
 import { AddressAliasHelper } from "src/vendor/AddressAliasHelper.sol";
 
+import { LibString } from "@solady/utils/LibString.sol";
 import { LibFacet } from "src/libraries/LibFacet.sol";
 
 /// @custom:upgradeable
@@ -22,6 +23,8 @@ import { LibFacet } from "src/libraries/LibFacet.sol";
 ///         and minting/burning tokens that are native to the remote chain.
 abstract contract StandardBridge is Initializable {
     using SafeERC20 for IERC20;
+    using LibString for *;
+
 
     /// @notice The L2 gas limit set when eth is depoisited using the receive() function.
     uint32 internal constant RECEIVE_DEFAULT_GAS_LIMIT = 200_000;
@@ -109,6 +112,18 @@ abstract contract StandardBridge is Initializable {
         uint256 depositIdNonce;
     }
 
+    function getDepositHash(bytes32 _depositId) public view returns (bytes32) {
+        return s().depositHashes[_depositId];
+    }
+
+    function getFinalizedDeposit(bytes32 _depositId) public view returns (bool) {
+        return s().finalizedDeposits[_depositId];
+    }
+
+    function getDepositIdNonce() public view returns (uint256) {
+        return s().depositIdNonce;
+    }
+
     function s() internal pure returns (BridgeStorage storage cs) {
         bytes32 position = keccak256("BridgeStorage.contract.storage");
         assembly {
@@ -130,6 +145,14 @@ abstract contract StandardBridge is Initializable {
         return !onL1();
     }
 
+    function undoL1ToL2Alias(address _address) public pure returns (address) {
+        return AddressAliasHelper.undoL1ToL2Alias(_address);
+    }
+
+    function applyL1ToL2Alias(address _address) public pure returns (address) {
+        return AddressAliasHelper.applyL1ToL2Alias(_address);
+    }
+
     /// @notice Ensures that the caller is a cross-chain message from the other bridge.
     modifier onlyOtherBridgeOrSelf() {
         if (onL1()) {
@@ -140,8 +163,11 @@ abstract contract StandardBridge is Initializable {
         } else {
             require(
                 msg.sender == address(this) ||
-                msg.sender == AddressAliasHelper.undoL1ToL2Alias(address(otherBridge)),
-                "StandardBridge: function can only be called from the L1 bridge"
+                AddressAliasHelper.undoL1ToL2Alias(msg.sender) == address(otherBridge),
+                "StandardBridge: function can only be called from the L1 bridge, msg.sender: "
+                .concat(msg.sender.toHexString())
+                .concat(", otherBridge: ").concat(address(otherBridge).toHexString())
+                .concat(", otherBridge L1 alias: ").concat(AddressAliasHelper.undoL1ToL2Alias(address(otherBridge)).toHexString()).concat(", this: ").concat(address(this).toHexString())
             );
         }
         _;
@@ -466,11 +492,7 @@ abstract contract StandardBridge is Initializable {
         if (onL1()) {
             bytes32 depositId = generateDepositId();
 
-            bytes memory payload = abi.encodeWithSelector(
-                this.finalizeBridgeERC20.selector,
-                // Because this call will be executed on the remote chain, we reverse the order of
-                // the remote and local token addresses relative to their order in the
-                // finalizeBridgeERC20 function.
+            bytes memory payload = abi.encode(
                 _remoteToken,
                 _localToken,
                 _from,

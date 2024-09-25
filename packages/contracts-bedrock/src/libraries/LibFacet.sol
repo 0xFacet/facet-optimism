@@ -8,8 +8,9 @@ import "forge-std/console2.sol";
 library LibFacet {
     using LibRLP for LibRLP.List;
 
+    address constant facetInboxAddress = 0x00000000000000000000000000000000000FacE7;
     bytes32 constant facetEventSignature = 0x00000000000000000000000000000000000000000000000000000000000face7;
-    uint8 constant facetTxType = 70;
+    uint8 constant facetTxType = 0x46;
 
     function sendFacetTransaction(
         address to,
@@ -82,13 +83,13 @@ library LibFacet {
         sendFacetTransaction(to, 0, gasLimit, data);
     }
 
-    function sendFacetTransaction(
+    function prepareFacetTransaction(
         bytes memory to,
         uint256 value,
         uint256 maxFeePerGas,
         uint256 gasLimit,
         bytes memory data
-    ) internal {
+    ) internal view returns (bytes memory) {
         uint256 chainId;
 
         if (block.chainid == 1) {
@@ -108,10 +109,20 @@ library LibFacet {
         list.p(gasLimit);
         list.p(data);
 
-        bytes memory out = abi.encodePacked(facetTxType, list.encode());
+        return abi.encodePacked(facetTxType, list.encode());
+    }
+
+    function sendFacetTransaction(
+        bytes memory to,
+        uint256 value,
+        uint256 maxFeePerGas,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        bytes memory payload = prepareFacetTransaction(to, value, maxFeePerGas, gasLimit, data);
 
         assembly {
-            log1(add(out, 32), mload(out), facetEventSignature)
+            log1(add(payload, 32), mload(payload), facetEventSignature)
         }
     }
 }

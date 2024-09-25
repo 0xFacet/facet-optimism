@@ -5,15 +5,15 @@ import "forge-std/Script.sol";
 import { L2StandardBridge } from "../src/L2/L2StandardBridge.sol";
 import { L2CrossDomainMessenger } from "../src/L2/L2CrossDomainMessenger.sol";
 import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableERC20Factory.sol";
-import { LibFacet } from "../src/libraries/LibFacet.sol";
 import { LibRLP } from "../src/libraries/LibRLP.sol";
 import { JSONParserLib } from "@solady/utils/JSONParserLib.sol";
 import { Proxy } from "src/universal/Proxy.sol";
 import { EIP1967Helper } from "test/mocks/EIP1967Helper.sol";
 import { Artifacts, Deployment } from "./Artifacts.s.sol";
 import { ForgeArtifacts } from "scripts/libraries/ForgeArtifacts.sol";
+import { FoundryFacetSender } from "./FoundryFacetSender.sol";
 
-contract CreateFacetContracts is Script, Artifacts {
+contract CreateFacetContracts is Script, Artifacts, FoundryFacetSender {
     using LibRLP for LibRLP.List;
 
     modifier broadcast() {
@@ -40,19 +40,15 @@ contract CreateFacetContracts is Script, Artifacts {
         deployImplementation("OptimismMintableERC20Factory", type(OptimismMintableERC20Factory).creationCode);
     }
 
-    function compAddr(address deployer, uint256 nonce) pure internal returns (address) {
-        return address(uint160(uint256(keccak256(LibRLP.p(deployer).p(nonce).p('facet').encode()))));
-    }
-
     function nextAddress() internal returns (address) {
-        address addr = compAddr(msg.sender, deployerNonce);
+        address addr = LibRLP.computeAddress(msg.sender, deployerNonce);
         deployerNonce++;
         return addr;
     }
 
     function deployImplementation(string memory _name, bytes memory _creationCode) public returns (address addr_) {
         addr_ = nextAddress();
-        LibFacet.sendFacetTransaction({
+        sendFacetTransactionFoundry({
             gasLimit: 5_000_000,
             data: _creationCode
         });
@@ -75,7 +71,7 @@ contract CreateFacetContracts is Script, Artifacts {
 
         addr_ = nextAddress();
 
-        LibFacet.sendFacetTransaction({
+        sendFacetTransactionFoundry({
             gasLimit: 5_000_000,
             data: abi.encodePacked(
                 type(Proxy).creationCode,

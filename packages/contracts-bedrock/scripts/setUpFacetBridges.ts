@@ -54,10 +54,10 @@ async function processAndVerifyContracts() {
     const proxyAddress = artifacts[`${contractName}Proxy`];
 
     // Verify the implementation contract
-    verifyContract(`forge verify-contract --rpc-url https://cardinal.facet.org/ --verifier blockscout --verifier-url 'https://cardinal.explorer.facet.org/api/' ${implementationAddress} ${filePaths[contractName]}:${contractName}`);
+    verifyContract(`forge verify-contract --rpc-url https://sepolia.facet.org/ --verifier blockscout --verifier-url 'https://sepolia.explorer.facet.org/api/' ${implementationAddress} ${filePaths[contractName]}:${contractName}`);
 
     // Verify the proxy contract
-    verifyContract(`forge verify-contract --rpc-url https://cardinal.facet.org/ --verifier blockscout --verifier-url 'https://cardinal.explorer.facet.org/api/' ${proxyAddress} ${filePaths['Proxy']}:Proxy`);
+    verifyContract(`forge verify-contract --rpc-url https://sepolia.facet.org/ --verifier blockscout --verifier-url 'https://sepolia.explorer.facet.org/api/' ${proxyAddress} ${filePaths['Proxy']}:Proxy`);
 
     process.env[contractName] = proxyAddress;
   }
