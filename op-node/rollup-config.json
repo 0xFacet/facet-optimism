@@ -26,6 +26,7 @@
   "canyon_time": 0,
   "ecotone_time": 0,
   "delta_time": 0,
+  "fjord_time": 0,
   "batch_inbox_address": "0xff000000000000000000000000000000000face7",
   "deposit_contract_address": "0xa21e4369552c2ac7ff81b2870e7440b1ebcbcc50",
   "l1_system_config_address": "0xDF2A9D7BcecfC40e273BeE3bDc49Aa2013A31da1",
