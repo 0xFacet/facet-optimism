@@ -227,9 +227,6 @@ func (d *EngDeriver) OnEvent(ev event.Event) bool {
 	case ForceEngineResetEvent:
 		ForceEngineReset(d.ec, x)
 
-		// Time to apply the changes to the underlying engine
-		// d.emitter.Emit(TryUpdateEngineEvent{})
-
 		log.Debug("Reset of Engine is completed",
 			"safeHead", x.Safe, "unsafe", x.Unsafe, "safe_timestamp", x.Safe.Time,
 			"unsafe_timestamp", x.Unsafe.Time)

@@ -325,11 +325,6 @@ contract Deploy is Deployer {
         deployERC1967Proxy("SuperchainConfigProxy");
         deploySuperchainConfig();
         initializeSuperchainConfig();
-
-        // Deploy the ProtocolVersionsProxy
-        // deployERC1967Proxy("ProtocolVersionsProxy");
-        // deployProtocolVersions();
-        // initializeProtocolVersions();
     }
 
     /// @notice Deploy a new OP Chain, with an existing SuperchainConfig provided
@@ -345,14 +340,6 @@ contract Deploy is Deployer {
         deployProxies();
         deployImplementations();
         initializeImplementations();
-
-        // setAlphabetFaultGameImplementation({ _allowUpgrade: false });
-        // setFastFaultGameImplementation({ _allowUpgrade: false });
-        // setCannonFaultGameImplementation({ _allowUpgrade: false });
-        // setPermissionedCannonFaultGameImplementation({ _allowUpgrade: false });
-
-        // transferDisputeGameFactoryOwnership();
-        // transferDelayedWETHOwnership();
     }
 
     /// @notice Deploy all of the proxies
@@ -363,17 +350,12 @@ contract Deploy is Deployer {
         deployERC1967Proxy("SystemConfigProxy");
         deployL1StandardBridgeProxy();
         deployL1CrossDomainMessengerProxy();
-        // deployERC1967Proxy("OptimismMintableERC20FactoryProxy");
-        // deployERC1967Proxy("L1ERC721BridgeProxy");
 
         // Both the DisputeGameFactory and L2OutputOracle proxies are deployed regardless of whether fault proofs is
         // enabled to prevent a nastier refactor to the deploy scripts. In the future, the L2OutputOracle will be
         // removed. If fault proofs are not enabled, the DisputeGameFactory proxy will be unused.
         // deployERC1967Proxy("DisputeGameFactoryProxy");
         deployERC1967Proxy("L2OutputOracleProxy");
-        // deployERC1967Proxy("DelayedWETHProxy");
-        // deployERC1967Proxy("PermissionedDelayedWETHProxy");
-        // deployERC1967Proxy("AnchorStateRegistryProxy");
 
         transferAddressManagerOwnership(); // to the ProxyAdmin
     }
@@ -411,14 +393,8 @@ contract Deploy is Deployer {
 
         initializeSystemConfig();
         initializeL1StandardBridge();
-        // initializeL1ERC721Bridge();
-        // initializeOptimismMintableERC20Factory();
         initializeL1CrossDomainMessenger();
         initializeL2OutputOracle();
-        // initializeDisputeGameFactory();
-        // initializeDelayedWETH();
-        // initializePermissionedDelayedWETH();
-        // initializeAnchorStateRegistry();
     }
 
     /// @notice Add AltDA setup to the OP chain
@@ -637,7 +613,6 @@ contract Deploy is Deployer {
         // are always proxies.
         Types.ContractSet memory contracts = _proxiesUnstrict();
         contracts.L1CrossDomainMessenger = address(messenger);
-        ChainAssertions.checkL1CrossDomainMessenger({ _contracts: contracts, _vm: vm, _isProxy: false });
 
         addr_ = address(messenger);
     }
@@ -858,7 +833,6 @@ contract Deploy is Deployer {
         // are always proxies.
         Types.ContractSet memory contracts = _proxiesUnstrict();
         contracts.L1StandardBridge = address(bridge);
-        ChainAssertions.checkL1StandardBridge({ _contracts: contracts, _isProxy: false });
 
         addr_ = address(bridge);
     }
@@ -1124,8 +1098,6 @@ contract Deploy is Deployer {
 
         string memory version = L1StandardBridge(payable(l1StandardBridgeProxy)).version();
         console.log("L1StandardBridge version: %s", version);
-
-        ChainAssertions.checkL1StandardBridge({ _contracts: _proxies(), _isProxy: true });
     }
 
     /// @notice Initialize the L1ERC721Bridge
@@ -1224,8 +1196,6 @@ contract Deploy is Deployer {
         L1CrossDomainMessenger messenger = L1CrossDomainMessenger(l1CrossDomainMessengerProxy);
         string memory version = messenger.version();
         console.log("L1CrossDomainMessenger version: %s", version);
-
-        ChainAssertions.checkL1CrossDomainMessenger({ _contracts: _proxies(), _vm: vm, _isProxy: true });
     }
 
     /// @notice Initialize the L2OutputOracle

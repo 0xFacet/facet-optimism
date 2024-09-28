@@ -7,8 +7,6 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
-	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
-	"github.com/ethereum-optimism/optimism/op-node/rollup/engine"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/event"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/finality"
 	"github.com/ethereum-optimism/optimism/op-service/eth"
@@ -73,15 +71,6 @@ func (st *StatusTracker) OnEvent(ev event.Event) bool {
 	defer st.mu.Unlock()
 
 	switch x := ev.(type) {
-	case engine.ForkchoiceUpdateEvent:
-		// st.data.UnsafeL2 = x.UnsafeL2Head
-		// st.data.SafeL2 = x.SafeL2Head
-		// st.data.FinalizedL2 = x.FinalizedL2Head
-	case engine.PendingSafeUpdateEvent:
-		// st.data.UnsafeL2 = x.Unsafe
-		// st.data.PendingSafeL2 = x.PendingSafe
-	case derive.DeriverL1StatusEvent:
-		// st.data.CurrentL1 = x.Origin
 	case L1UnsafeEvent:
 		st.metrics.RecordL1Ref("l1_head", x.L1Unsafe)
 		// We don't need to do anything if the head hasn't changed.
@@ -116,10 +105,6 @@ func (st *StatusTracker) OnEvent(ev event.Event) bool {
 		st.data.UnsafeL2 = eth.L2BlockRef{}
 		st.data.SafeL2 = eth.L2BlockRef{}
 		st.data.CurrentL1 = eth.L1BlockRef{}
-	case engine.EngineResetConfirmedEvent:
-		// st.data.UnsafeL2 = x.Unsafe
-		// st.data.SafeL2 = x.Safe
-		// st.data.FinalizedL2 = x.Finalized
 	case SetL2BlocksEvent:
 		st.data.UnsafeL2 = x.UnsafeL2
 		st.data.SafeL2 = x.SafeL2
