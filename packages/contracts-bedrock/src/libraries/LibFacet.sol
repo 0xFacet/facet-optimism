@@ -125,4 +125,40 @@ library LibFacet {
             log1(add(payload, 32), mload(payload), facetEventSignature)
         }
     }
+    
+    function saferSendFacetTransaction(
+        bytes memory to,
+        uint256 value,
+        uint256 maxFeePerGas,
+        uint256 gasLimit,
+        bytes memory data
+    ) internal {
+        if (alreadyCalled()) {
+            revert("Already called");
+        }
+
+        sendFacetTransaction(to, value, maxFeePerGas, gasLimit, data);
+    }
+    
+    bytes32 constant perTxNonceSlot = 0x921b3be6b4a61c5e824a33c83976193e48fd69e9fb9b930d3253f0536a64e84b;
+    
+    function alreadyCalled() internal view returns (bool) {
+        uint256 value;
+        uint256 gasBefore = gasleft();
+
+        assembly {
+            value := sload(perTxNonceSlot)
+        }
+
+        uint256 gasAfter = gasleft();
+        uint256 gasUsed = gasBefore - gasAfter;
+
+        if (gasUsed == 117) {
+            return true;
+        } else if (gasUsed == 2117) {
+            return false;
+        } else {
+            revert(string.concat("Invalid gasUsed: ", LibString.toString(gasUsed)));
+        }
+    }
 }
