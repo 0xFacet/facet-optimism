@@ -1,4 +1,4 @@
 {
   "editorconfig.generateAuto": false,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": false
 }

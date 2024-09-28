@@ -22,7 +22,7 @@ const (
 	L1InfoFuncEcotoneSignature = "setL1BlockValuesEcotone()"
 	L1InfoArguments            = 8
 	L1InfoBedrockLen           = 4 + 32*L1InfoArguments
-	L1InfoEcotoneLen           = 4 + 32*5 + 32*2 // after Ecotone upgrade, args are packed into 5 32-byte slots (plus the FCT slots)
+	L1InfoEcotoneLen           = 4 + 32*5 // after Ecotone upgrade, args are packed into 5 32-byte slots
 )
 
 var (
@@ -138,9 +138,8 @@ func (info *L1BlockInfo) unmarshalBinaryBedrock(data []byte) error {
 	if info.L1FeeScalar, err = solabi.ReadEthBytes32(reader); err != nil {
 		return err
 	}
-	remainingBytes := reader.Len()
-	if remainingBytes != 64 {
-		return fmt.Errorf("unexpected number of remaining bytes: %d, expected: 64", remainingBytes)
+	if !solabi.EmptyReader(reader) {
+		return errors.New("too many bytes")
 	}
 	return nil
 }
@@ -239,9 +238,8 @@ func (info *L1BlockInfo) unmarshalBinaryEcotone(data []byte) error {
 	if info.BatcherAddr, err = solabi.ReadAddress(r); err != nil {
 		return err
 	}
-	remainingBytes := r.Len()
-	if remainingBytes != 64 {
-		return fmt.Errorf("unexpected number of remaining bytes: %d, expected: 64", remainingBytes)
+	if !solabi.EmptyReader(r) {
+		return errors.New("too many bytes")
 	}
 	return nil
 }

@@ -5,7 +5,7 @@
       "number": 6399999
     },
     "l2": {
-      "hash": "0x88b24fcfed5bda90d6376554bf78739c4fc56ea3fce38c86d9bb425b15ba9857",
+      "hash": "0xfd0175b68948a8a581d8589dca323316acc812cec0122114b41e2708784d5aca",
       "number": 0
     },
     "l2_time": 1722291600,
@@ -26,6 +26,7 @@
   "canyon_time": 0,
   "ecotone_time": 0,
   "delta_time": 0,
+  "fjord_time": 0,
   "batch_inbox_address": "0xff000000000000000000000000000000000face7",
   "deposit_contract_address": "0xa21e4369552c2ac7ff81b2870e7440b1ebcbcc50",
   "l1_system_config_address": "0xDF2A9D7BcecfC40e273BeE3bDc49Aa2013A31da1",
