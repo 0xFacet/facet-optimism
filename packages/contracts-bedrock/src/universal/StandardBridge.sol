@@ -112,16 +112,12 @@ abstract contract StandardBridge is Initializable {
         uint256 depositIdNonce;
     }
 
-    function getDepositHash(bytes32 _depositId) public view returns (bytes32) {
+    function getDepositHash(bytes32 _depositId) public view onlyOnL1 returns (bytes32) {
         return s().depositHashes[_depositId];
     }
 
-    function getFinalizedDeposit(bytes32 _depositId) public view returns (bool) {
+    function getFinalizedDeposit(bytes32 _depositId) public view onlyOnL2 returns (bool) {
         return s().finalizedDeposits[_depositId];
-    }
-
-    function getDepositIdNonce() public view returns (uint256) {
-        return s().depositIdNonce;
     }
 
     function s() internal pure returns (BridgeStorage storage cs) {
@@ -129,6 +125,20 @@ abstract contract StandardBridge is Initializable {
         assembly {
            cs.slot := position
         }
+    }
+
+    modifier onlyOnL1() {
+        require(onL1(), "StandardBridge: function can only be called on L1");
+        _;
+    }
+    
+    modifier onlyOnL2() {
+        require(onL2(), "StandardBridge: function can only be called on L2");
+        _;
+    }
+
+    function generateDepositId() internal onlyOnL1 returns (bytes32) {
+        return keccak256(abi.encode(address(this), msg.sender, s().depositIdNonce++));
     }
 
     /// @notice Only allow EOAs to call the functions. Note that this is not safe against contracts
@@ -144,17 +154,9 @@ abstract contract StandardBridge is Initializable {
     function onL2() internal pure returns (bool) {
         return !onL1();
     }
-
-    function undoL1ToL2Alias(address _address) public pure returns (address) {
-        return AddressAliasHelper.undoL1ToL2Alias(_address);
-    }
-
-    function applyL1ToL2Alias(address _address) public pure returns (address) {
-        return AddressAliasHelper.applyL1ToL2Alias(_address);
-    }
-
+    
     /// @notice Ensures that the caller is a cross-chain message from the other bridge.
-    modifier onlyOtherBridgeOrSelf() {
+    modifier onlyOtherBridge() {
         if (onL1()) {
             require(
                 msg.sender == address(messenger) && messenger.xDomainMessageSender() == address(otherBridge),
@@ -162,12 +164,8 @@ abstract contract StandardBridge is Initializable {
             );
         } else {
             require(
-                msg.sender == address(this) ||
                 AddressAliasHelper.undoL1ToL2Alias(msg.sender) == address(otherBridge),
-                "StandardBridge: function can only be called from the L1 bridge, msg.sender: "
-                .concat(msg.sender.toHexString())
-                .concat(", otherBridge: ").concat(address(otherBridge).toHexString())
-                .concat(", otherBridge L1 alias: ").concat(AddressAliasHelper.undoL1ToL2Alias(address(otherBridge)).toHexString()).concat(", this: ").concat(address(this).toHexString())
+                "StandardBridge: function can only be called from the L1 bridge"
             );
         }
         _;
@@ -310,7 +308,7 @@ abstract contract StandardBridge is Initializable {
     )
         public
         payable
-        onlyOtherBridgeOrSelf
+        onlyOtherBridge
     {
         require(paused() == false, "StandardBridge: paused");
         require(isCustomGasToken() == false, "StandardBridge: cannot bridge ETH with custom gas token");
@@ -326,9 +324,7 @@ abstract contract StandardBridge is Initializable {
         require(success, "StandardBridge: ETH transfer failed");
     }
 
-    function replayERC20Deposit(bytes32 _depositId, bytes memory _payload) public {
-        require(onL1(), "StandardBridge: only callable on L1");
-
+    function replayERC20Deposit(bytes32 _depositId, bytes memory _payload) public onlyOnL1 {
         bytes32 depositHash = s().depositHashes[_depositId];
 
         require(_depositId != bytes32(0), "StandardBridge: deposit not found");
@@ -352,9 +348,10 @@ abstract contract StandardBridge is Initializable {
     function finalizeBridgeERC20Replayable(
         bytes32 _depositId,
         bytes calldata finalizeBridgeERC20Data
-    ) public onlyOtherBridgeOrSelf {
-        require(onL2(), "StandardBridge: only callable on L2");
-        require(!s().finalizedDeposits[_depositId], "StandardBridge: deposit already finalized");
+    ) public onlyOnL2 onlyOtherBridge {
+        bool depositFinalized = s().finalizedDeposits[_depositId];
+        require(!depositFinalized, "StandardBridge: deposit already finalized");
+        
         s().finalizedDeposits[_depositId] = true;
 
         (
@@ -396,7 +393,7 @@ abstract contract StandardBridge is Initializable {
         bytes memory _extraData
     )
         public
-        onlyOtherBridgeOrSelf
+        onlyOtherBridge
     {
         require(paused() == false, "StandardBridge: paused");
         if (_isOptimismMintableERC20(_localToken)) {
@@ -414,10 +411,6 @@ abstract contract StandardBridge is Initializable {
         // Emit the correct events. By default this will be ERC20BridgeFinalized, but child
         // contracts may override this function in order to emit legacy events as well.
         _emitERC20BridgeFinalized(_localToken, _remoteToken, _from, _to, _amount, _extraData);
-    }
-
-    function generateDepositId() internal returns (bytes32) {
-        return keccak256(abi.encode(address(this), msg.sender, s().depositIdNonce++));
     }
 
     /// @notice Initiates a bridge of ETH through the CrossDomainMessenger.
