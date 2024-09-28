@@ -97,7 +97,6 @@ contract InitFacetContracts is Script, FoundryFacetSender {
 
         sendFacetTransactionFoundry({
             to: deployments["OptimismMintableERC20Factory"].proxy,
-            value: 0,
             gasLimit: 5_000_000,
             data: abi.encodeCall(OptimismMintableERC20Factory.createOptimismMintableERC20, (
                 0x5589BB8228C07c4e15558875fAf2B859f678d129,

@@ -332,7 +332,6 @@ abstract contract StandardBridge is Initializable {
         require(depositHash == keccak256(_payload), "StandardBridge: invalid deposit payload");
 
         LibFacet.sendFacetTransaction({
-            value: 0,
             gasLimit: 500_000,
             to: address(otherBridge),
             data: abi.encodeWithSelector(

@@ -13,74 +13,30 @@ library LibFacet {
     uint8 constant facetTxType = 0x46;
 
     function sendFacetTransaction(
-        address to,
-        uint256 value,
-        uint256 maxFeePerGas,
         uint256 gasLimit,
         bytes memory data
     ) internal {
-        sendFacetTransaction(abi.encodePacked(to), value, maxFeePerGas, gasLimit, data);
+        sendFacetTransaction({
+            to: bytes(''),
+            value: 0,
+            maxFeePerGas: 0,
+            gasLimit: gasLimit,
+            data: data
+        });
     }
 
-    function sendFacetTransaction(
-        uint256 value,
-        uint256 maxFeePerGas,
-        uint256 gasLimit,
-        bytes memory data
-    ) internal {
-        sendFacetTransaction(bytes(''), value, maxFeePerGas, gasLimit, data);
-    }
-
-    function sendFacetTransaction(
-        uint256 value,
-        uint256 gasLimit,
-        bytes memory data
-    ) internal {
-        sendFacetTransaction(bytes(''), value, 0, gasLimit, data);
-    }
-
-    function sendFacetTransaction(
-        address to,
-        uint256 value,
-        uint256 gasLimit,
-        bytes memory data
-    ) internal {
-        sendFacetTransaction(abi.encodePacked(to), value, 0, gasLimit, data);
-    }
-
-    function sendFacetTransaction(
-        bytes memory data,
-        address to,
-        uint256 maxFeePerGas,
-        uint256 gasLimit
-    ) internal {
-        sendFacetTransaction(to, 0, maxFeePerGas, gasLimit, data);
-    }
-
-    // Overload for sendFacetTransaction without 'to' and without value
-    function sendFacetTransaction(
-        bytes memory data,
-        uint256 maxFeePerGas,
-        uint256 gasLimit
-    ) internal {
-        sendFacetTransaction(0, maxFeePerGas, gasLimit, data);
-    }
-
-    // Overload for sendFacetTransaction without 'to', 'value', and 'maxFeePerGas'
-    function sendFacetTransaction(
-        uint256 gasLimit,
-        bytes memory data
-    ) internal {
-        sendFacetTransaction(bytes(''), 0, 0, gasLimit, data);
-    }
-
-    // Overload for sendFacetTransaction with address, without value and maxFeePerGas
     function sendFacetTransaction(
         address to,
         uint256 gasLimit,
         bytes memory data
     ) internal {
-        sendFacetTransaction(to, 0, gasLimit, data);
+        sendFacetTransaction({
+            to: abi.encodePacked(to),
+            value: 0,
+            maxFeePerGas: 0,
+            gasLimit: gasLimit,
+            data: data
+        });
     }
 
     function prepareFacetTransaction(
@@ -123,42 +79,6 @@ library LibFacet {
 
         assembly {
             log1(add(payload, 32), mload(payload), facetEventSignature)
-        }
-    }
-    
-    function saferSendFacetTransaction(
-        bytes memory to,
-        uint256 value,
-        uint256 maxFeePerGas,
-        uint256 gasLimit,
-        bytes memory data
-    ) internal {
-        if (alreadyCalled()) {
-            revert("Already called");
-        }
-
-        sendFacetTransaction(to, value, maxFeePerGas, gasLimit, data);
-    }
-    
-    bytes32 constant perTxNonceSlot = 0x921b3be6b4a61c5e824a33c83976193e48fd69e9fb9b930d3253f0536a64e84b;
-    
-    function alreadyCalled() internal view returns (bool) {
-        uint256 value;
-        uint256 gasBefore = gasleft();
-
-        assembly {
-            value := sload(perTxNonceSlot)
-        }
-
-        uint256 gasAfter = gasleft();
-        uint256 gasUsed = gasBefore - gasAfter;
-
-        if (gasUsed == 117) {
-            return true;
-        } else if (gasUsed == 2117) {
-            return false;
-        } else {
-            revert(string.concat("Invalid gasUsed: ", LibString.toString(gasUsed)));
         }
     }
 }
