@@ -13,7 +13,6 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { Constants } from "src/libraries/Constants.sol";
 import { AddressAliasHelper } from "src/vendor/AddressAliasHelper.sol";
 
-import { LibString } from "@solady/utils/LibString.sol";
 import { LibFacet } from "src/libraries/LibFacet.sol";
 
 /// @custom:upgradeable
@@ -23,8 +22,6 @@ import { LibFacet } from "src/libraries/LibFacet.sol";
 ///         and minting/burning tokens that are native to the remote chain.
 abstract contract StandardBridge is Initializable {
     using SafeERC20 for IERC20;
-    using LibString for *;
-
 
     /// @notice The L2 gas limit set when eth is depoisited using the receive() function.
     uint32 internal constant RECEIVE_DEFAULT_GAS_LIMIT = 200_000;
