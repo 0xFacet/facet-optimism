@@ -8,6 +8,8 @@ import { SuperchainConfig } from "src/L1/SuperchainConfig.sol";
 import { OptimismPortal } from "src/L1/OptimismPortal.sol";
 import { SystemConfig } from "src/L1/SystemConfig.sol";
 
+import { IWETH } from "src/dispute/interfaces/IWETH.sol";
+
 /// @custom:proxied
 /// @title L1StandardBridge
 /// @notice The L1StandardBridge is responsible for transfering ETH and ERC20 tokens between L1 and
@@ -198,6 +200,34 @@ contract L1StandardBridge is StandardBridge, ISemver {
         virtual
     {
         _initiateERC20Deposit(_l1Token, _l2Token, msg.sender, _to, _amount, _minGasLimit, _extraData);
+    }
+    
+    function depositWethTo(
+        IWETH weth,
+        address _l2Token,
+        address _to,
+        uint256 _amount,
+        uint32 _minGasLimit,
+        bytes calldata _extraData
+    )
+        external
+        virtual
+        payable
+    {
+        require(msg.value == _amount, "Invalid amount");
+        require(msg.value > 0, "Invalid amount");
+
+        weth.deposit{value: _amount}();
+
+        _initiateERC20Deposit({
+            _l1Token: address(weth),
+            _l2Token: _l2Token,
+            _from: address(this),
+            _to: _to,
+            _amount: _amount,
+            _minGasLimit: _minGasLimit,
+            _extraData: _extraData
+        });
     }
 
     /// @custom:legacy
