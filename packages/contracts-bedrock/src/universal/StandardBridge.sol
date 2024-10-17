@@ -440,6 +440,29 @@ abstract contract StandardBridge is Initializable {
         });
     }
 
+    function _initiateBridgeERC20(
+        address _localToken,
+        address _remoteToken,
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint32 _minGasLimit,
+        bytes memory _extraData
+    )
+        internal
+    {
+        _initiateBridgeERC20({
+            _localToken: _localToken,
+            _remoteToken: _remoteToken,
+            _from: _from,
+            _to: _to,
+            _amount: _amount,
+            _minGasLimit: _minGasLimit,
+            _extraData: _extraData,
+            _performSafeTransferFrom: true
+        });
+    }
+
     /// @notice Sends ERC20 tokens to a receiver's address on the other chain.
     /// @param _localToken  Address of the ERC20 on this chain.
     /// @param _remoteToken Address of the corresponding token on the remote chain.
@@ -456,7 +479,8 @@ abstract contract StandardBridge is Initializable {
         address _to,
         uint256 _amount,
         uint32 _minGasLimit,
-        bytes memory _extraData
+        bytes memory _extraData,
+        bool _performSafeTransferFrom
     )
         internal
     {
@@ -470,7 +494,10 @@ abstract contract StandardBridge is Initializable {
 
             OptimismMintableERC20(_localToken).burn(_from, _amount);
         } else {
-            IERC20(_localToken).safeTransferFrom(_from, address(this), _amount);
+            if (_performSafeTransferFrom) {
+                IERC20(_localToken).safeTransferFrom(_from, address(this), _amount);
+            }
+            
             deposits[_localToken][_remoteToken] = deposits[_localToken][_remoteToken] + _amount;
         }
 

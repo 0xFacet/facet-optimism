@@ -204,7 +204,7 @@ contract L1StandardBridge is StandardBridge, ISemver {
     
     function depositWethTo(
         IWETH weth,
-        address _l2Token,
+        address _remoteToken,
         address _to,
         uint256 _amount,
         uint32 _minGasLimit,
@@ -219,14 +219,15 @@ contract L1StandardBridge is StandardBridge, ISemver {
 
         weth.deposit{value: _amount}();
 
-        _initiateERC20Deposit({
-            _l1Token: address(weth),
-            _l2Token: _l2Token,
-            _from: address(this),
+        _initiateBridgeERC20({
+            _localToken: address(weth),
+            _remoteToken: _remoteToken,
+            _from: msg.sender,
             _to: _to,
             _amount: _amount,
             _minGasLimit: _minGasLimit,
-            _extraData: _extraData
+            _extraData: _extraData,
+            _performSafeTransferFrom: false
         });
     }
 
