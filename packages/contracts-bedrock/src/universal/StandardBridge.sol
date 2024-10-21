@@ -397,7 +397,7 @@ abstract contract StandardBridge is Initializable {
         address _from,
         address _to,
         uint256 _amount,
-        bytes memory _extraData
+        bytes calldata _extraData
     ) public onlyOnL2 onlyOtherBridge {
         bool depositFinalized = s().finalizedDeposits[_depositId];
         require(!depositFinalized, "StandardBridge: deposit already finalized");
@@ -431,7 +431,7 @@ abstract contract StandardBridge is Initializable {
         address _from,
         address _to,
         uint256 _amount,
-        bytes memory _extraData
+        bytes calldata _extraData
     )
         public
         onlyOtherBridge
