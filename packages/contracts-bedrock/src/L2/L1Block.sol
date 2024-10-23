@@ -56,6 +56,10 @@ contract L1Block is ISemver, IGasToken {
 
     /// @notice The latest L1 blob base fee.
     uint256 public blobBaseFee;
+    
+    uint256 public fctMintRate;
+    
+    uint256 public fctMintedInRateAdjustmentPeriod;
 
     /// @custom:semver 1.4.1-beta.1
     function version() public pure virtual returns (string memory) {
@@ -149,6 +153,8 @@ contract L1Block is ISemver, IGasToken {
             sstore(blobBaseFee.slot, calldataload(68)) // uint256
             sstore(hash.slot, calldataload(100)) // bytes32
             sstore(batcherHash.slot, calldataload(132)) // bytes32
+            sstore(fctMintRate.slot, calldataload(164)) // uint256
+            sstore(fctMintedInRateAdjustmentPeriod.slot, calldataload(196)) // uint256
         }
     }
 
