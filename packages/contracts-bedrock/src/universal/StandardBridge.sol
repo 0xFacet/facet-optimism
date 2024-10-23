@@ -140,7 +140,8 @@ abstract contract StandardBridge is Initializable {
     }
 
     function generateDepositId() internal onlyOnL1 returns (bytes32) {
-        return keccak256(abi.encode(address(this), msg.sender, s().depositIdNonce++));
+        s().depositIdNonce++;
+        return keccak256(abi.encode(address(this), msg.sender, s().depositIdNonce));
     }
 
     /// @notice Only allow EOAs to call the functions. Note that this is not safe against contracts
