@@ -505,7 +505,8 @@ abstract contract StandardBridge is Initializable {
             _amount: _amount,
             _minGasLimit: _minGasLimit,
             _extraData: _extraData,
-            _performSafeTransferFrom: true
+            _performSafeTransferFrom: true,
+            _allowMsgValue: false
         });
     }
 
@@ -526,11 +527,12 @@ abstract contract StandardBridge is Initializable {
         uint256 _amount,
         uint32 _minGasLimit,
         bytes memory _extraData,
-        bool _performSafeTransferFrom
+        bool _performSafeTransferFrom,
+        bool _allowMsgValue
     )
         internal
     {
-        require(msg.value == 0, "StandardBridge: cannot send value");
+        require(msg.value == 0 || _allowMsgValue, "StandardBridge: cannot send value");
 
         if (_isOptimismMintableERC20(_localToken)) {
             require(
