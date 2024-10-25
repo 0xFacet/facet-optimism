@@ -31,7 +31,7 @@ abstract contract FoundryFacetSender {
             to: bytes(''),
             gasLimit: gasLimit,
             value: 0,
-            maxFeePerGas: 0,
+            maxFeePerGas: 10_000 gwei,
             data: data
         });
     }
@@ -45,7 +45,7 @@ abstract contract FoundryFacetSender {
             to: abi.encodePacked(to),
             gasLimit: gasLimit,
             value: 0,
-            maxFeePerGas: 0,
+            maxFeePerGas: 10_000 gwei,
             data: data
         });
     }

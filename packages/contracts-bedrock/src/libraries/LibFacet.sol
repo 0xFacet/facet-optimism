@@ -19,7 +19,7 @@ library LibFacet {
         sendFacetTransaction({
             to: bytes(''),
             value: 0,
-            maxFeePerGas: 0,
+            maxFeePerGas: 10_000 gwei,
             gasLimit: gasLimit,
             data: data
         });
@@ -33,7 +33,7 @@ library LibFacet {
         sendFacetTransaction({
             to: abi.encodePacked(to),
             value: 0,
-            maxFeePerGas: 0,
+            maxFeePerGas: 10_000 gwei,
             gasLimit: gasLimit,
             data: data
         });

@@ -6,24 +6,10 @@ import { console2 as console } from "forge-std/console2.sol";
 import { Deployer } from "scripts/deploy/Deployer.sol";
 
 import { Config, OutputMode, OutputModeUtils, Fork, ForkUtils, LATEST_FORK } from "scripts/libraries/Config.sol";
-import { Artifacts } from "scripts/Artifacts.s.sol";
-import { DeployConfig } from "scripts/deploy/DeployConfig.s.sol";
 import { Predeploys } from "src/libraries/Predeploys.sol";
 import { Preinstalls } from "src/libraries/Preinstalls.sol";
-import { L2CrossDomainMessenger } from "src/L2/L2CrossDomainMessenger.sol";
 import { L1Block } from "src/L2/L1Block.sol";
 import { GasPriceOracle } from "src/L2/GasPriceOracle.sol";
-import { L2StandardBridge } from "src/L2/L2StandardBridge.sol";
-import { L2ERC721Bridge } from "src/L2/L2ERC721Bridge.sol";
-import { SequencerFeeVault } from "src/L2/SequencerFeeVault.sol";
-import { OptimismMintableERC20Factory } from "src/universal/OptimismMintableERC20Factory.sol";
-import { OptimismMintableERC721Factory } from "src/universal/OptimismMintableERC721Factory.sol";
-import { BaseFeeVault } from "src/L2/BaseFeeVault.sol";
-import { L1FeeVault } from "src/L2/L1FeeVault.sol";
-import { GovernanceToken } from "src/governance/GovernanceToken.sol";
-import { L1CrossDomainMessenger } from "src/L1/L1CrossDomainMessenger.sol";
-import { L1StandardBridge } from "src/L1/L1StandardBridge.sol";
-import { FeeVault } from "src/universal/FeeVault.sol";
 import { EIP1967Helper } from "test/mocks/EIP1967Helper.sol";
 import { Process } from "scripts/libraries/Process.sol";
 
