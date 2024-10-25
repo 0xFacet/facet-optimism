@@ -29,9 +29,8 @@ contract TestBridgeIn is Script, FoundryFacetSender {
         vm.stopBroadcast();
     }
 
-    L1StandardBridge public constant bridge = L1StandardBridge(payable(0x3F5992b77455856B9Bc729809f58D135B28aDe4A));
-    address public immutable l2BridgeRecipient = msg.sender;
-    address public immutable remoteToken = 0xD0e9b6D999ee78b7F25B6917540A29Ed1981EFFd;
+    L1StandardBridge public constant bridge = L1StandardBridge(payable(0xd398709F2d628716FEf4A884f80C363B8c556EB4));
+    address public immutable remoteToken = 0x59d2f345B11d866e0a71b8998AeA55AfC54A3307;
 
     function run() external broadcast {
         FaucetTestingToken testToken = FaucetTestingToken(0x5589BB8228C07c4e15558875fAf2B859f678d129);

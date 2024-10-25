@@ -1,0 +1,61 @@
+# Use the official Golang image as the base image
+FROM golang:1.21.3-alpine3.18 AS builder
+
+RUN apk add --no-cache make gcc musl-dev linux-headers git bash
+
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download all dependencies
+RUN go mod download
+
+COPY . .
+
+# Build op-node
+ARG GIT_COMMIT
+ARG GIT_DATE
+ARG OP_NODE_VERSION=v0.0.0
+
+RUN cd op-node && make op-node \
+    GOOS=linux GOARCH=amd64 GITCOMMIT=$GIT_COMMIT GITDATE=$GIT_DATE VERSION="$OP_NODE_VERSION"
+
+# Final stage
+FROM alpine:3.18 AS op-node-target
+
+WORKDIR /app
+
+# Install necessary runtime dependencies
+RUN apk add --no-cache ca-certificates bash make
+
+# Copy the built binary from the builder stage
+COPY --from=builder /app/op-node/bin/op-node /usr/local/bin/
+
+# Copy the rollup config file
+COPY op-node/rollup-config.json /app/op-node/rollup-config.json
+
+# Copy the init_node.sh script
+COPY init_node.sh /app/init_node.sh
+
+# Make sure the init_node.sh script is executable
+RUN chmod +x /app/init_node.sh
+
+# Expose necessary ports
+EXPOSE 8545 9545
+
+# Set environment variables with default values
+# ENV OP_NODE_L2_ENGINE_RPC=https://sepolia.facet.org
+
+RUN adduser -D myuser
+USER myuser
+
+# Set the entrypoint to the init_node.sh script
+ENTRYPOINT ["/app/init_node.sh"]
+
+# Add metadata labels
+ARG COMMIT=""
+ARG VERSION=""
+ARG BUILDNUM=""
+
+LABEL commit="$COMMIT" version="$VERSION" buildnum="$BUILDNUM"

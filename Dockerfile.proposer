@@ -1,0 +1,53 @@
+# Use the official Golang image as the base image
+FROM golang:1.21.3-alpine3.18 AS builder
+
+RUN apk add --no-cache make gcc musl-dev linux-headers git bash
+
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download all dependencies
+RUN go mod download
+
+COPY . .
+
+# Build op-proposer
+ARG GIT_COMMIT
+ARG GIT_DATE
+ARG OP_PROPOSER_VERSION=v0.0.0
+
+RUN cd op-proposer && make op-proposer \
+    GOOS=linux GOARCH=amd64 GITCOMMIT=$GIT_COMMIT GITDATE=$GIT_DATE VERSION="$OP_PROPOSER_VERSION"
+
+# Final stage
+FROM alpine:3.18 AS op-proposer-target
+
+WORKDIR /app
+
+# Install necessary runtime dependencies
+RUN apk add --no-cache ca-certificates bash
+
+# Copy the built binary from the builder stage
+COPY --from=builder /app/op-proposer/bin/op-proposer /usr/local/bin/
+
+# Copy the init_proposer.sh script
+COPY init_proposer.sh /app/init_proposer.sh
+
+# Make sure the init_proposer.sh script is executable
+RUN chmod +x /app/init_proposer.sh
+
+# Create a non-root user
+RUN adduser -D myuser
+USER myuser
+
+# Set the entrypoint to the init_proposer.sh script
+ENTRYPOINT ["/app/init_proposer.sh"]
+
+# Add metadata labels
+ARG COMMIT=""
+ARG VERSION=""
+ARG BUILDNUM=""
+
+LABEL commit="$COMMIT" version="$VERSION" buildnum="$BUILDNUM"
