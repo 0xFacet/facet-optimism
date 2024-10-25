@@ -203,7 +203,7 @@ contract L1StandardBridge is StandardBridge, ISemver {
     }
     
     function depositWethTo(
-        IWETH weth,
+        IWETH _localWeth,
         address _remoteToken,
         address _to,
         uint256 _amount,
@@ -217,17 +217,18 @@ contract L1StandardBridge is StandardBridge, ISemver {
         require(msg.value == _amount, "Invalid amount");
         require(msg.value > 0, "Invalid amount");
 
-        weth.deposit{value: _amount}();
+        _localWeth.deposit{value: _amount}();
 
         _initiateBridgeERC20({
-            _localToken: address(weth),
+            _localToken: address(_localWeth),
             _remoteToken: _remoteToken,
             _from: msg.sender,
             _to: _to,
             _amount: _amount,
             _minGasLimit: _minGasLimit,
             _extraData: _extraData,
-            _performSafeTransferFrom: false
+            _performSafeTransferFrom: false,
+            _allowMsgValue: true
         });
     }
 
