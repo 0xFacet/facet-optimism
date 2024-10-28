@@ -166,6 +166,87 @@ contract L1BlockEcotone_Test is L1BlockTest {
         bytes memory expReturn = hex"3cc50b45";
         assertEq(data, expReturn);
     }
+
+    /// @dev Tests that setL1BlockValuesEcotone correctly stores mint rate and data gas
+    function testFuzz_setL1BlockValuesEcotone_mintRateAndDataGas_succeeds(
+        uint128 dataGas,
+        uint128 rate
+    ) external {
+        bytes memory functionCallDataPacked = Encoding.encodeSetL1BlockValuesEcotone(
+            0,                  // baseFeeScalar
+            0,                  // blobBaseFeeScalar
+            0,                  // sequenceNumber
+            uint64(block.timestamp),  // timestamp
+            uint64(block.number),     // number
+            0,                  // baseFee
+            0,                  // blobBaseFee
+            blockhash(block.number - 1),         // hash
+            bytes32(0),         // batcherHash
+            dataGas,           // fctMintPeriodL1DataGas
+            rate              // fctMintRate
+        );
+
+        vm.prank(depositor);
+        (bool success,) = address(l1Block).call(functionCallDataPacked);
+        assertTrue(success, "Function call failed");
+
+        assertEq(l1Block.fctMintRate(), rate, "Wrong mint rate");
+        assertEq(l1Block.fctMintPeriodL1DataGas(), dataGas, "Wrong data gas");
+
+        // Verify the raw storage layout in slot 8
+        bytes32 slot = vm.load(address(l1Block), bytes32(uint256(8)));
+        assertEq(
+            slot, 
+            bytes32((uint256(dataGas) << 128) | uint256(rate)),
+            "Wrong raw storage layout"
+        );
+    }
+
+    /// @dev Tests specific values for mint rate and data gas
+    function test_setL1BlockValuesEcotone_mintRateAndDataGas_specific_succeeds() external {
+        uint128 dataGas = 500_000;
+        uint128 rate = 1_000;
+
+        bytes memory functionCallDataPacked = Encoding.encodeSetL1BlockValuesEcotone(
+            0, 0, 0,
+            uint64(block.timestamp),
+            uint64(block.number),
+            0, 0,
+            bytes32(0),
+            bytes32(0),
+            dataGas,
+            rate
+        );
+
+        vm.prank(depositor);
+        (bool success,) = address(l1Block).call(functionCallDataPacked);
+        assertTrue(success, "Function call failed");
+
+        assertEq(l1Block.fctMintRate(), rate, "Wrong mint rate");
+        assertEq(l1Block.fctMintPeriodL1DataGas(), dataGas, "Wrong data gas");
+
+        // Test with different values
+        dataGas = type(uint128).max;
+        rate = type(uint128).max;
+        
+        functionCallDataPacked = Encoding.encodeSetL1BlockValuesEcotone(
+            0, 0, 0,
+            uint64(block.timestamp),
+            uint64(block.number),
+            0, 0,
+            bytes32(0),
+            blockhash(block.number - 1),
+            dataGas,
+            rate
+        );
+
+        vm.prank(depositor);
+        (success,) = address(l1Block).call(functionCallDataPacked);
+        assertTrue(success, "Second function call failed");
+
+        assertEq(l1Block.fctMintRate(), rate, "Wrong mint rate after update");
+        assertEq(l1Block.fctMintPeriodL1DataGas(), dataGas, "Wrong data gas after update");
+    }
 }
 
 contract L1BlockCustomGasToken_Test is L1BlockTest {

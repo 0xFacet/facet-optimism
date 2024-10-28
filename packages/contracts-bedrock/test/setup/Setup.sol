@@ -133,28 +133,28 @@ contract Setup {
 
         optimismPortal = OptimismPortal(deploy.mustGetAddress("OptimismPortalProxy"));
         optimismPortal2 = OptimismPortal2(deploy.mustGetAddress("OptimismPortalProxy"));
-        disputeGameFactory = DisputeGameFactory(deploy.mustGetAddress("DisputeGameFactoryProxy"));
-        delayedWeth = DelayedWETH(deploy.mustGetAddress("DelayedWETHProxy"));
+        // disputeGameFactory = DisputeGameFactory(deploy.mustGetAddress("DisputeGameFactoryProxy"));
+        // delayedWeth = DelayedWETH(deploy.mustGetAddress("DelayedWETHProxy"));
         l2OutputOracle = L2OutputOracle(deploy.mustGetAddress("L2OutputOracleProxy"));
         systemConfig = SystemConfig(deploy.mustGetAddress("SystemConfigProxy"));
         l1StandardBridge = L1StandardBridge(deploy.mustGetAddress("L1StandardBridgeProxy"));
         l1CrossDomainMessenger = L1CrossDomainMessenger(deploy.mustGetAddress("L1CrossDomainMessengerProxy"));
         addressManager = AddressManager(deploy.mustGetAddress("AddressManager"));
-        l1ERC721Bridge = L1ERC721Bridge(deploy.mustGetAddress("L1ERC721BridgeProxy"));
-        l1OptimismMintableERC20Factory =
-            OptimismMintableERC20Factory(deploy.mustGetAddress("OptimismMintableERC20FactoryProxy"));
-        protocolVersions = ProtocolVersions(deploy.mustGetAddress("ProtocolVersionsProxy"));
+        // l1ERC721Bridge = L1ERC721Bridge(deploy.mustGetAddress("L1ERC721BridgeProxy"));
+        // l1OptimismMintableERC20Factory =
+        //     OptimismMintableERC20Factory(deploy.mustGetAddress("OptimismMintableERC20FactoryProxy"));
+        // protocolVersions = ProtocolVersions(deploy.mustGetAddress("ProtocolVersionsProxy"));
         superchainConfig = SuperchainConfig(deploy.mustGetAddress("SuperchainConfigProxy"));
-        anchorStateRegistry = AnchorStateRegistry(deploy.mustGetAddress("AnchorStateRegistryProxy"));
+        // anchorStateRegistry = AnchorStateRegistry(deploy.mustGetAddress("AnchorStateRegistryProxy"));
 
         vm.label(address(l2OutputOracle), "L2OutputOracle");
         vm.label(deploy.mustGetAddress("L2OutputOracleProxy"), "L2OutputOracleProxy");
         vm.label(address(optimismPortal), "OptimismPortal");
         vm.label(deploy.mustGetAddress("OptimismPortalProxy"), "OptimismPortalProxy");
         vm.label(address(disputeGameFactory), "DisputeGameFactory");
-        vm.label(deploy.mustGetAddress("DisputeGameFactoryProxy"), "DisputeGameFactoryProxy");
+        // vm.label(deploy.mustGetAddress("DisputeGameFactoryProxy"), "DisputeGameFactoryProxy");
         vm.label(address(delayedWeth), "DelayedWETH");
-        vm.label(deploy.mustGetAddress("DelayedWETHProxy"), "DelayedWETHProxy");
+        // vm.label(deploy.mustGetAddress("DelayedWETHProxy"), "DelayedWETHProxy");
         vm.label(address(systemConfig), "SystemConfig");
         vm.label(deploy.mustGetAddress("SystemConfigProxy"), "SystemConfigProxy");
         vm.label(address(l1StandardBridge), "L1StandardBridge");
@@ -163,11 +163,11 @@ contract Setup {
         vm.label(deploy.mustGetAddress("L1CrossDomainMessengerProxy"), "L1CrossDomainMessengerProxy");
         vm.label(address(addressManager), "AddressManager");
         vm.label(address(l1ERC721Bridge), "L1ERC721Bridge");
-        vm.label(deploy.mustGetAddress("L1ERC721BridgeProxy"), "L1ERC721BridgeProxy");
+        // vm.label(deploy.mustGetAddress("L1ERC721BridgeProxy"), "L1ERC721BridgeProxy");
         vm.label(address(l1OptimismMintableERC20Factory), "OptimismMintableERC20Factory");
-        vm.label(deploy.mustGetAddress("OptimismMintableERC20FactoryProxy"), "OptimismMintableERC20FactoryProxy");
+        // vm.label(deploy.mustGetAddress("OptimismMintableERC20FactoryProxy"), "OptimismMintableERC20FactoryProxy");
         vm.label(address(protocolVersions), "ProtocolVersions");
-        vm.label(deploy.mustGetAddress("ProtocolVersionsProxy"), "ProtocolVersionsProxy");
+        // vm.label(deploy.mustGetAddress("ProtocolVersionsProxy"), "ProtocolVersionsProxy");
         vm.label(address(superchainConfig), "SuperchainConfig");
         vm.label(deploy.mustGetAddress("SuperchainConfigProxy"), "SuperchainConfigProxy");
         vm.label(AddressAliasHelper.applyL1ToL2Alias(address(l1CrossDomainMessenger)), "L1CrossDomainMessenger_aliased");
@@ -190,10 +190,10 @@ contract Setup {
         );
 
         // Set the governance token's owner to be the final system owner
-        address finalSystemOwner = deploy.cfg().finalSystemOwner();
-        vm.startPrank(governanceToken.owner());
-        governanceToken.transferOwnership(finalSystemOwner);
-        vm.stopPrank();
+        // address finalSystemOwner = deploy.cfg().finalSystemOwner();
+        // vm.startPrank(governanceToken.owner());
+        // governanceToken.transferOwnership(finalSystemOwner);
+        // vm.stopPrank();
 
         // L2 predeploys
         labelPredeploy(Predeploys.L2_STANDARD_BRIDGE);
