@@ -13,7 +13,8 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { Constants } from "src/libraries/Constants.sol";
 import { AddressAliasHelper } from "src/vendor/AddressAliasHelper.sol";
 
-import { LibFacet } from "src/libraries/LibFacet.sol";
+import { LibFacet } from "lib/facet-sol/src/utils/LibFacet.sol";
+
 
 /// @custom:upgradeable
 /// @title StandardBridge

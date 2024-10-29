@@ -11,7 +11,7 @@ import { Proxy } from "src/universal/Proxy.sol";
 import { EIP1967Helper } from "test/mocks/EIP1967Helper.sol";
 import { Artifacts, Deployment } from "./Artifacts.s.sol";
 import { ForgeArtifacts } from "scripts/libraries/ForgeArtifacts.sol";
-import { FoundryFacetSender } from "./FoundryFacetSender.sol";
+import { FoundryFacetSender } from "lib/facet-sol/src/foundry-utils/FoundryFacetSender.sol";
 
 contract CreateFacetContracts is Script, Artifacts, FoundryFacetSender {
     using LibRLP for LibRLP.List;

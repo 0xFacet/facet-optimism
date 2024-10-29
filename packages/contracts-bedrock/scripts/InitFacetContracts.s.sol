@@ -8,7 +8,7 @@ import { L2CrossDomainMessenger } from "../src/L2/L2CrossDomainMessenger.sol";
 import { L1CrossDomainMessenger } from "../src/L1/L1CrossDomainMessenger.sol";
 import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableERC20Factory.sol";
 import { Proxy } from "src/universal/Proxy.sol";
-import { FoundryFacetSender } from "./FoundryFacetSender.sol";
+import { FoundryFacetSender } from "lib/facet-sol/src/foundry-utils/FoundryFacetSender.sol";
 
 contract InitFacetContracts is Script, FoundryFacetSender {
     struct Deployment {

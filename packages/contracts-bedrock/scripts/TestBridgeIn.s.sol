@@ -8,7 +8,7 @@ import { L2CrossDomainMessenger } from "../src/L2/L2CrossDomainMessenger.sol";
 import { L1CrossDomainMessenger } from "../src/L1/L1CrossDomainMessenger.sol";
 import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableERC20Factory.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { FoundryFacetSender } from "./FoundryFacetSender.sol";
+import { FoundryFacetSender } from "lib/facet-sol/src/foundry-utils/FoundryFacetSender.sol";
 
 contract FaucetTestingToken is ERC20 {
     /// @notice Creates the ERC20 with standard parameters.
