@@ -202,7 +202,24 @@ contract L1StandardBridge is StandardBridge, ISemver {
         _initiateERC20Deposit(_l1Token, _l2Token, msg.sender, _to, _amount, _minGasLimit, _extraData);
     }
     
-    function depositWethTo(
+    function bridgeETHToWETH(
+        IWETH _localWeth,
+        address _remoteToken,
+        uint256 _amount,
+        uint32 _minGasLimit,
+        bytes calldata _extraData
+    ) external virtual payable onlyEOA {
+        bridgeETHToWETHTo({
+            _localWeth: _localWeth,
+            _remoteToken: _remoteToken,
+            _to: msg.sender,
+            _amount: _amount,
+            _minGasLimit: _minGasLimit,
+            _extraData: _extraData
+        });
+    }
+    
+    function bridgeETHToWETHTo(
         IWETH _localWeth,
         address _remoteToken,
         address _to,
@@ -210,7 +227,7 @@ contract L1StandardBridge is StandardBridge, ISemver {
         uint32 _minGasLimit,
         bytes calldata _extraData
     )
-        external
+        public
         virtual
         payable
     {
