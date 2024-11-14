@@ -99,12 +99,16 @@ contract L2Genesis is Deployer {
     function runWithLatestLocal() public {
         runWithOptions(OutputMode.NONE, LATEST_FORK);
     }
+    
+    function l2ChainId() internal view returns (uint256) {
+        return vm.envUint("L2_CHAIN_ID");
+    }
 
     /// @notice Build the L2 genesis.
     function runWithOptions(OutputMode _mode, Fork _fork) public {
         console.log("L2Genesis: outputMode: %s, fork: %s", _mode.toString(), _fork.toString());
         vm.startPrank(deployer);
-        vm.chainId(cfg.l2ChainID());
+        vm.chainId(l2ChainId());
 
         dealEthToPrecompiles();
         setPredeployProxies();
@@ -119,13 +123,9 @@ contract L2Genesis is Deployer {
             return;
         }
 
-        activateEcotone();
-
         if (writeForkGenesisAllocs(_fork, Fork.ECOTONE, _mode)) {
             return;
         }
-
-        activateFjord();
 
         if (writeForkGenesisAllocs(_fork, Fork.FJORD, _mode)) {
             return;
@@ -196,7 +196,6 @@ contract L2Genesis is Deployer {
     function setPredeployImplementations() internal {
         console.log("Setting predeploy implementations with L1 contract dependencies:");
         setWETH(); // 6: WETH (not behind a proxy)
-        setGasPriceOracle(); // f
         setL1Block(); // 15
         setL2ToL1MessagePasser(); // 16
         setProxyAdmin(); // 18
@@ -210,10 +209,12 @@ contract L2Genesis is Deployer {
 
         bytes32 _ownerSlot = bytes32(0);
 
+        address depositorAccount = L1Block(Predeploys.L1_BLOCK_ATTRIBUTES).DEPOSITOR_ACCOUNT();
+
         // there is no initialize() function, so we just set the storage manually.
-        vm.store(Predeploys.PROXY_ADMIN, _ownerSlot, bytes32(uint256(uint160(cfg.proxyAdminOwner()))));
+        vm.store(Predeploys.PROXY_ADMIN, _ownerSlot, bytes32(uint256(uint160(depositorAccount))));
         // update the proxy to not be uninitialized (although not standard initialize pattern)
-        vm.store(impl, _ownerSlot, bytes32(uint256(uint160(cfg.proxyAdminOwner()))));
+        vm.store(impl, _ownerSlot, bytes32(uint256(uint160(depositorAccount))));
     }
 
     function setL2ToL1MessagePasser() public {
@@ -232,11 +233,6 @@ contract L2Genesis is Deployer {
             // Note: L1 block attributes are set to 0.
             // Before the first user-tx the state is overwritten with actual L1 attributes.
         }
-    }
-
-    /// @notice This predeploy is following the safety invariant #1.
-    function setGasPriceOracle() public {
-        _setImplementationCode(Predeploys.GAS_PRICE_ORACLE);
     }
 
     /// @notice This predeploy is following the safety invariant #1.
@@ -299,21 +295,6 @@ contract L2Genesis is Deployer {
         vm.setNonce(Preinstalls.BeaconBlockRootsSender, 1);
     }
 
-    /// @notice Activate Ecotone network upgrade.
-    function activateEcotone() public {
-        require(Preinstalls.BeaconBlockRoots.code.length > 0, "L2Genesis: must have beacon-block-roots contract");
-        console.log("Activating ecotone in GasPriceOracle contract");
-
-        vm.prank(L1Block(Predeploys.L1_BLOCK_ATTRIBUTES).DEPOSITOR_ACCOUNT());
-        GasPriceOracle(Predeploys.GAS_PRICE_ORACLE).setEcotone();
-    }
-
-    function activateFjord() public {
-        console.log("Activating fjord in GasPriceOracle contract");
-        vm.prank(L1Block(Predeploys.L1_BLOCK_ATTRIBUTES).DEPOSITOR_ACCOUNT());
-        GasPriceOracle(Predeploys.GAS_PRICE_ORACLE).setFjord();
-    }
-
     /// @notice Sets the bytecode in state
     function _setImplementationCode(address _addr) internal returns (address) {
         string memory cname = Predeploys.getName(_addr);
@@ -327,7 +308,7 @@ contract L2Genesis is Deployer {
     function _setPreinstallCode(address _addr) internal {
         string memory cname = Preinstalls.getName(_addr);
         console.log("Setting %s preinstall code at: %s", cname, _addr);
-        vm.etch(_addr, Preinstalls.getDeployedCode(_addr, cfg.l2ChainID()));
+        vm.etch(_addr, Preinstalls.getDeployedCode(_addr, l2ChainId()));
         // during testing in a shared L1/L2 account namespace some preinstalls may already have been inserted and used.
         if (vm.getNonce(_addr) == 0) {
             vm.setNonce(_addr, 1);
