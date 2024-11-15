@@ -59,7 +59,7 @@ From here on out it's *exactly* the same as how you'd bridge with Optimism.
 
 ### Bridge a token into Facet
 
-1. Find your `createOptimismMintableERC20` transaction on the [Facet testnet explorer](https://cardinal.explorer.facet.org/).
+1. Find your `createOptimismMintableERC20` transaction on the [Facet testnet explorer](https://sepolia.explorer.facet.org/).
 2. Edit `TestBridgeIn.s.sol` in `packages/contracts-bedrock/`.
 3. Run:
    ```bash
