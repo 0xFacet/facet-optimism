@@ -93,56 +93,45 @@ async function main() {
 
   const sourceId = 11155111
 
-  const optimism2 = /*#__PURE__*/ defineChain({
-    ...chainConfig,
-    id: 10,
-    name: 'OP Mainnet',
-    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  export const facetSepolia = defineChain({
+    id: 0xface7a,
+    name: "Facet Sepolia",
+    nativeCurrency: { name: "Facet Compute Token", symbol: "FCT", decimals: 18 },
     rpcUrls: {
       default: {
-        http: ['https://mainnet.optimism.io'],
+        http: ["https://sepolia.facet.org"],
       },
     },
     blockExplorers: {
       default: {
-        name: 'Optimism Explorer',
-        url: 'https://optimistic.etherscan.io',
-        apiUrl: 'https://api-optimistic.etherscan.io/api',
+        name: "Blockscout",
+        url: "https://sepolia.explorer.facet.org",
       },
     },
     contracts: {
       ...chainConfig.contracts,
-      disputeGameFactory: {
-        [sourceId]: {
-          address: '0xe5965Ab5962eDc7477C8520243A95517CD252fA9',
-        },
-      },
       l2OutputOracle: {
-        [sourceId]: {
-          address: '0x60cecA8aaDe7fbc8221BcFd8202BDb4c7774Fda5',
+        [sepolia.id]: {
+          address: "0xDf9aF3B2e9617D53FD2E0096859ec7f4db6c96c9",
         },
-      },
-      multicall3: {
-        address: '0xca11bde05977b3631167028862be2a173976ca11',
-        blockCreated: 4286263,
       },
       portal: {
-        [sourceId]: {
-          address: '0x95Af43232Bf5dBD3F3b844f446d5f874fd756B50',
+        [sepolia.id]: {
+          address: "0x34936f885d551C5f887Ed50bDc02eEB89F015930",
         },
       },
       l1StandardBridge: {
-        [sourceId]: {
-          address: '0xda187cDdF7F405518b9DD3dCf33016ecb9bb3C93',
+        [sepolia.id]: {
+          address: "0x46787ffeC1be4dc1c9D8eaD9dE3B83E41063C772",
         },
       },
     },
-    sourceId,
-  })
+    sourceId: sourceId,
+  });
 
   const output = await publicClientL1.getL2Output({
     l2BlockNumber: receipt.blockNumber,
-    targetChain: optimism2 as any,
+    targetChain: facetSepolia,
   })
 
   console.log({output})
@@ -155,7 +144,7 @@ async function main() {
   const args = {
     ...args1,
     authorizationList: [],
-    targetChain: optimism2
+    targetChain: facetSepolia
   }
 
   console.log({args})
@@ -172,7 +161,7 @@ async function main() {
   await new Promise(resolve => setTimeout(resolve, 60000));
 
   const finalizeHash = await walletClientL1.finalizeWithdrawal({
-    targetChain: optimism2,
+    targetChain: facetSepolia,
     withdrawal,
   })
 
