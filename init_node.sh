@@ -45,6 +45,7 @@ $OP_NODE_BIN \
   --sequencer.enabled=false \
   --l1.epoch-poll-interval=12s \
   --l2.enginekind=geth \
+  --syncmode execution-layer \
   --l2 $OP_NODE_L2_ENGINE_RPC \
   --l1 $OP_NODE_L1_ETH_RPC \
   $ADDITIONAL_FLAGS
