@@ -40,7 +40,6 @@ $OP_NODE_BIN \
   --rpc.port=${PORT:-9545} \
   --rollup.config "./op-node/rollup-config.json" \
   --p2p.disable \
-  --rpc.enable-admin \
   --sequencer.stopped=true \
   --sequencer.enabled=false \
   --l1.epoch-poll-interval=12s \
