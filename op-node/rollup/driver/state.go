@@ -260,8 +260,8 @@ func (s *Driver) eventLoop() {
 			result, err := sync.CurrentHeads(s.driverCtx, s.Config, s.L2)
 			if err != nil {
 				s.log.Error("Failed to find L2 heads", "err", err)
-				s.Emitter.Emit(rollup.ResetEvent{Err: fmt.Errorf("failed to find L2 heads: %w", err)})
-				return
+				s.Emitter.Emit(rollup.EngineTemporaryErrorEvent{Err: fmt.Errorf("failed to find L2 heads: %w", err)})
+				continue
 			}
 
 			s.log.Info("Successfully found L2 heads", "unsafe", result.Unsafe, "safe", result.Safe, "finalized", result.Finalized)
@@ -270,8 +270,8 @@ func (s *Driver) eventLoop() {
 			l1Block, err := s.L1.L1BlockRefByHash(s.driverCtx, L1UnsafeHash)
 			if err != nil {
 				s.log.Error("Failed to retrieve L1 block by hash", "hash", L1UnsafeHash, "err", err)
-				s.Emitter.Emit(rollup.ResetEvent{Err: fmt.Errorf("failed to retrieve L1 block by hash: %w", err)})
-				return
+				s.Emitter.Emit(rollup.EngineTemporaryErrorEvent{Err: fmt.Errorf("failed to retrieve L1 block by hash: %w", err)})
+				continue
 			}
 
 			s.Emitter.Emit(status.SetL2BlocksEvent{
