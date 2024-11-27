@@ -14,7 +14,7 @@ import { Enum as SafeOps } from "safe-contracts/common/Enum.sol";
 
 import { Deployer } from "scripts/deploy/Deployer.sol";
 
-import { ProxyAdmin } from "src/universal/ProxyAdmin.sol";
+import { ProxyAdmin, Ownable } from "src/universal/ProxyAdmin.sol";
 import { AddressManager } from "src/legacy/AddressManager.sol";
 import { Proxy } from "src/universal/Proxy.sol";
 import { L1StandardBridge } from "src/L1/L1StandardBridge.sol";
@@ -294,6 +294,8 @@ contract Deploy is Deployer {
         console.log("set up superchain!");
         setupOpChain();
         console.log("set up op chain!");
+        
+        transferProxyAdminOwnershipToFinalSystemOwner();
     }
 
     ////////////////////////////////////////////////////////////////
@@ -344,10 +346,6 @@ contract Deploy is Deployer {
         deployL1StandardBridgeProxy();
         deployL1CrossDomainMessengerProxy();
 
-        // Both the DisputeGameFactory and L2OutputOracle proxies are deployed regardless of whether fault proofs is
-        // enabled to prevent a nastier refactor to the deploy scripts. In the future, the L2OutputOracle will be
-        // removed. If fault proofs are not enabled, the DisputeGameFactory proxy will be unused.
-        // deployERC1967Proxy("DisputeGameFactoryProxy");
         deployERC1967Proxy("L2OutputOracleProxy");
 
         transferAddressManagerOwnership(); // to the ProxyAdmin
@@ -357,26 +355,15 @@ contract Deploy is Deployer {
     function deployImplementations() public {
         console.log("Deploying implementations");
         deployL1CrossDomainMessenger();
-        // deployOptimismMintableERC20Factory();
         deploySystemConfig();
         deployL1StandardBridge();
-        // deployL1ERC721Bridge();
         deployOptimismPortal();
         deployL2OutputOracle();
-        // Fault proofs
-        // deployOptimismPortal2();
-        // deployDisputeGameFactory();
-        // deployDelayedWETH();
-        // deployPreimageOracle();
-        // deployMips();
-        // deployAnchorStateRegistry();
     }
 
     /// @notice Initialize all of the implementations
     function initializeImplementations() public {
         console.log("Initializing implementations");
-        // Selectively initialize either the original OptimismPortal or the new OptimismPortal2. Since this will upgrade
-        // the proxy, we cannot initialize both.
         initializeOptimismPortal();
 
         initializeSystemConfig();
@@ -433,24 +420,6 @@ contract Deploy is Deployer {
 
         save(_name, addr_);
         console.log("New safe: %s deployed at %s\n    Note that this safe is owned by the deployer key", _name, addr_);
-    }
-
-    /// @notice If the keepDeployer option was used with deploySafe(), this function can be used to remove the deployer.
-    ///         Note this function does not have the broadcast modifier.
-    function removeDeployerFromSafe(string memory _name, uint256 _newThreshold) public {
-        Safe safe = Safe(mustGetAddress(_name));
-
-        // The sentinel address is used to mark the start and end of the linked list of owners in the Safe.
-        address sentinelOwners = address(0x1);
-
-        // Because deploySafe() always adds msg.sender first (if keepDeployer is true), we know that the previousOwner
-        // will be sentinelOwners.
-        _callViaSafe({
-            _safe: safe,
-            _target: address(safe),
-            _data: abi.encodeCall(OwnerManager.removeOwner, (sentinelOwners, msg.sender, _newThreshold))
-        });
-        console.log("Removed deployer owner from ", _name);
     }
 
     /// @notice Deploy the AddressManager
@@ -663,6 +632,19 @@ contract Deploy is Deployer {
         }
 
         require(addressManager.owner() == proxyAdmin);
+    }
+    
+    function transferProxyAdminOwnershipToFinalSystemOwner() public broadcast {
+        address proxyAdmin = mustGetAddress("ProxyAdmin");
+        Safe safe = Safe(mustGetAddress("SystemOwnerSafe"));
+        
+        _callViaSafe({
+            _safe: safe,
+            _target: proxyAdmin,
+            _data: abi.encodeCall(Ownable.transferOwnership, (cfg.finalSystemOwner()))
+        });
+        
+        console.log("ProxyAdmin ownership transferred to finalSystemOwner at: %s", cfg.finalSystemOwner());
     }
 
     ////////////////////////////////////////////////////////////////
