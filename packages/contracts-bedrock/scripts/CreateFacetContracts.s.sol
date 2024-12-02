@@ -11,23 +11,15 @@ import { Proxy } from "src/universal/Proxy.sol";
 import { EIP1967Helper } from "test/mocks/EIP1967Helper.sol";
 import { Artifacts, Deployment } from "./Artifacts.s.sol";
 import { ForgeArtifacts } from "scripts/libraries/ForgeArtifacts.sol";
-import { FoundryFacetSender } from "lib/facet-sol/src/foundry-utils/FoundryFacetSender.sol";
+import { FacetScript } from "lib/facet-sol/src/foundry-utils/FacetScript.sol";
 
-contract CreateFacetContracts is Script, Artifacts, FoundryFacetSender {
+contract CreateFacetContracts is Script, Artifacts, FacetScript {
     using LibRLP for LibRLP.List;
 
-    modifier broadcast() {
-        vm.startBroadcast(msg.sender);
-        _;
-        vm.stopBroadcast();
-    }
-
-    uint256 deployerNonce;
-
-    function setUp() public virtual override {
+    function setUp() public virtual override(FacetScript, Artifacts) {
         vm.setEnv("DEPLOYMENT_OUTFILE", vm.envString("L2_DEPLOYMENT_OUTFILE"));
         Artifacts.setUp();
-        deployerNonce = getL2Nonce();
+        FacetScript.setUp();
     }
 
     function run() external broadcast {
@@ -41,7 +33,7 @@ contract CreateFacetContracts is Script, Artifacts, FoundryFacetSender {
     }
 
     function nextAddress() internal returns (address) {
-        address addr = LibRLP.computeAddress(msg.sender, deployerNonce);
+        address addr = LibRLP.computeAddress(msg.sender, uint256(deployerNonce));
         deployerNonce++;
         return addr;
     }
@@ -82,40 +74,4 @@ contract CreateFacetContracts is Script, Artifacts, FoundryFacetSender {
         save(_name, addr_);
         console.log("   at %s", addr_);
     }
-
-    function getL2Nonce() internal returns (uint256) {
-        // Store the current fork ID
-        uint256 originalFork = vm.activeFork();
-
-        // Create and select the L2 fork
-        uint256 l2Fork = vm.createFork(vm.envString("L2_RPC"));
-        vm.selectFork(l2Fork);
-
-        // Construct the JSON string for the RPC parameters
-        string memory params = string(abi.encodePacked(
-            "[\"",
-            vm.toString(msg.sender), // Address of the message sender
-            "\", \"",
-            "latest",                // Block number
-            "\"]"
-        ));
-
-        // Perform the RPC call to get the nonce
-        bytes memory returnData = vm.rpc(
-            "eth_getTransactionCount", // RPC method for getting nonce
-            params                     // JSON string parameters
-        );
-
-        // Convert the returned hex string to a uint256
-        uint256 nonce = JSONParserLib.parseUintFromHex(vm.toString(returnData));
-
-        // Log the nonce
-        console.log("Nonce of", msg.sender, ":", nonce);
-
-        // Switch back to the original fork
-        vm.selectFork(originalFork);
-
-        return nonce;
-    }
-
 }

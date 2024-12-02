@@ -35,3 +35,4 @@
 [submodule "packages/contracts-bedrock/lib/facet-sol"]
 	path = packages/contracts-bedrock/lib/facet-sol
 	url = https://github.com/0xFacet/facet-sol
+	branch = v1.0.0

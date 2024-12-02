@@ -8,7 +8,7 @@ import { L2CrossDomainMessenger } from "../src/L2/L2CrossDomainMessenger.sol";
 import { L1CrossDomainMessenger } from "../src/L1/L1CrossDomainMessenger.sol";
 import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableERC20Factory.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { FoundryFacetSender } from "lib/facet-sol/src/foundry-utils/FoundryFacetSender.sol";
+import { FacetScript } from "lib/facet-sol/src/foundry-utils/FacetScript.sol";
 
 contract FaucetTestingToken is ERC20 {
     /// @notice Creates the ERC20 with standard parameters.
@@ -22,13 +22,7 @@ contract FaucetTestingToken is ERC20 {
     }
 }
 
-contract TestBridgeIn is Script, FoundryFacetSender {
-    modifier broadcast() {
-        vm.startBroadcast(msg.sender);
-        _;
-        vm.stopBroadcast();
-    }
-
+contract TestBridgeIn is Script, FacetScript {
     L1StandardBridge public constant bridge = L1StandardBridge(payable(0xd398709F2d628716FEf4A884f80C363B8c556EB4));
     address public immutable remoteToken = 0x59d2f345B11d866e0a71b8998AeA55AfC54A3307;
 

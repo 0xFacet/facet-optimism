@@ -422,6 +422,24 @@ contract Deploy is Deployer {
         console.log("New safe: %s deployed at %s\n    Note that this safe is owned by the deployer key", _name, addr_);
     }
 
+    /// @notice If the keepDeployer option was used with deploySafe(), this function can be used to remove the deployer.
+    ///         Note this function does not have the broadcast modifier.
+    function removeDeployerFromSafe(string memory _name, uint256 _newThreshold) public {
+        Safe safe = Safe(mustGetAddress(_name));
+
+        // The sentinel address is used to mark the start and end of the linked list of owners in the Safe.
+        address sentinelOwners = address(0x1);
+
+        // Because deploySafe() always adds msg.sender first (if keepDeployer is true), we know that the previousOwner
+        // will be sentinelOwners.
+        _callViaSafe({
+            _safe: safe,
+            _target: address(safe),
+            _data: abi.encodeCall(OwnerManager.removeOwner, (sentinelOwners, msg.sender, _newThreshold))
+        });
+        console.log("Removed deployer owner from ", _name);
+    }
+
     /// @notice Deploy the AddressManager
     function deployAddressManager() public broadcast returns (address addr_) {
         console.log("Deploying AddressManager");

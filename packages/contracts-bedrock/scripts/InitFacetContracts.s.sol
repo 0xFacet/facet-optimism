@@ -8,23 +8,18 @@ import { L2CrossDomainMessenger } from "../src/L2/L2CrossDomainMessenger.sol";
 import { L1CrossDomainMessenger } from "../src/L1/L1CrossDomainMessenger.sol";
 import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableERC20Factory.sol";
 import { Proxy } from "src/universal/Proxy.sol";
-import { FoundryFacetSender } from "lib/facet-sol/src/foundry-utils/FoundryFacetSender.sol";
+import { FacetScript } from "lib/facet-sol/src/foundry-utils/FacetScript.sol";
 
-contract InitFacetContracts is Script, FoundryFacetSender {
+contract InitFacetContracts is Script, FacetScript {
     struct Deployment {
         address implementation;
         address proxy;
     }
 
     mapping(string => Deployment) public deployments;
-
-    modifier broadcast() {
-        vm.startBroadcast(msg.sender);
-        _;
-        vm.stopBroadcast();
-    }
-
-    function setUp() public {
+    
+    function setUp() public override {
+        super.setUp();
         // string memory root = vm.projectRoot();
         string memory path = vm.envString("L2_DEPLOYMENT_OUTFILE");
         string memory json = vm.readFile(path);
