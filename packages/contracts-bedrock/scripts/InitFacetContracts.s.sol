@@ -9,6 +9,7 @@ import { L1CrossDomainMessenger } from "../src/L1/L1CrossDomainMessenger.sol";
 import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableERC20Factory.sol";
 import { Proxy } from "src/universal/Proxy.sol";
 import { FacetScript } from "lib/facet-sol/src/foundry-utils/FacetScript.sol";
+import { AddressAliasHelper } from "src/vendor/AddressAliasHelper.sol";
 
 contract InitFacetContracts is Script, FacetScript {
     struct Deployment {
@@ -90,16 +91,6 @@ contract InitFacetContracts is Script, FacetScript {
 
         upgradeToAndCall("OptimismMintableERC20Factory", factoryInitData);
 
-        sendFacetTransactionFoundry({
-            to: deployments["OptimismMintableERC20Factory"].proxy,
-            gasLimit: 5_000_000,
-            data: abi.encodeCall(OptimismMintableERC20Factory.createOptimismMintableERC20, (
-                0x5589BB8228C07c4e15558875fAf2B859f678d129,
-                'Test Name',
-                'TEST'
-            ))
-        });
-
         transferProxyAdminOwnership("L2CrossDomainMessenger");
         transferProxyAdminOwnership("L2StandardBridge");
         transferProxyAdminOwnership("OptimismMintableERC20Factory");
@@ -107,13 +98,19 @@ contract InitFacetContracts is Script, FacetScript {
 
     function transferProxyAdminOwnership(string memory implName) public {
         address proxy = deployments[implName].proxy;
+        address admin = vm.envAddress("GS_ADMIN_ADDRESS");
+        bool adminIsL1Contract = admin.code.length > 0;
+        
+        if (adminIsL1Contract) {
+            admin = AddressAliasHelper.applyL1ToL2Alias(admin);
+        }
 
         sendFacetTransactionFoundry({
             to: proxy,
             gasLimit: 5_000_000,
             data: abi.encodeCall(
                 Proxy.changeAdmin,
-                (vm.envAddress("GS_ADMIN_ADDRESS"))
+                (admin)
             )
         });
     }

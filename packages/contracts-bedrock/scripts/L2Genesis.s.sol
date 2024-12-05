@@ -101,7 +101,7 @@ contract L2Genesis is Deployer {
     }
     
     function l2ChainId() internal view returns (uint256) {
-        return vm.envUint("L2_CHAIN_ID");
+        return vm.envUint("L2_GENESIS_CHAIN_ID");
     }
 
     /// @notice Build the L2 genesis.
