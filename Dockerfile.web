@@ -32,8 +32,9 @@ RUN apk add --no-cache ca-certificates bash make
 # Copy the built binary from the builder stage
 COPY --from=builder /app/op-node/bin/op-node /usr/local/bin/
 
-# Copy the rollup config file
-COPY op-node/rollup-config.json /app/op-node/rollup-config.json
+# Copy both rollup config files
+COPY op-node/facet-mainnet-rollup-config.json /app/op-node/facet-mainnet-rollup-config.json
+COPY op-node/facet-sepolia-rollup-config.json /app/op-node/facet-sepolia-rollup-config.json
 
 # Copy the init_node.sh script
 COPY init_node.sh /app/init_node.sh

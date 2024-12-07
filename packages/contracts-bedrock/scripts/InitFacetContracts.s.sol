@@ -10,8 +10,9 @@ import { OptimismMintableERC20Factory } from "../src/universal/OptimismMintableE
 import { Proxy } from "src/universal/Proxy.sol";
 import { FacetScript } from "lib/facet-sol/src/foundry-utils/FacetScript.sol";
 import { AddressAliasHelper } from "src/vendor/AddressAliasHelper.sol";
+import { Deployer } from "./deploy/Deployer.sol";
 
-contract InitFacetContracts is Script, FacetScript {
+contract InitFacetContracts is Script, FacetScript, Deployer {
     struct Deployment {
         address implementation;
         address proxy;
@@ -19,8 +20,9 @@ contract InitFacetContracts is Script, FacetScript {
 
     mapping(string => Deployment) public deployments;
     
-    function setUp() public override {
-        super.setUp();
+    function setUp() public override(Deployer, FacetScript) {
+        Deployer.setUp();
+        FacetScript.setUp();
         // string memory root = vm.projectRoot();
         string memory path = vm.envString("L2_DEPLOYMENT_OUTFILE");
         string memory json = vm.readFile(path);
@@ -98,7 +100,7 @@ contract InitFacetContracts is Script, FacetScript {
 
     function transferProxyAdminOwnership(string memory implName) public {
         address proxy = deployments[implName].proxy;
-        address admin = vm.envAddress("GS_ADMIN_ADDRESS");
+        address admin = cfg.finalSystemOwner();
         bool adminIsL1Contract = admin.code.length > 0;
         
         if (adminIsL1Contract) {

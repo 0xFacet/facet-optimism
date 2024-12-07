@@ -1,0 +1,77 @@
+{
+  "l1StartingBlockTag": "",
+  
+  "l1ChainID": 1,
+  "l2ChainID": 16436858,
+  "l2BlockTime": 12,
+  "l1BlockTime": 12,
+  
+  "l2OutputOracleProposer": "",
+  "l2OutputOracleChallenger": "",
+  
+  "maxSequencerDrift": 600,
+  "sequencerWindowSize": 3600,
+  "channelTimeout": 300,
+
+  "p2pSequencerAddress": "0x0000000000000000000000000000000000000000",
+  "batchInboxAddress": "0x0000000000000000000000000000000000000000",
+  "batchSenderAddress": "0x0000000000000000000000000000000000000000",
+
+  "l2OutputOracleSubmissionInterval": 30,
+  "l2OutputOracleStartingBlockNumber": 2776,
+  "l2OutputOracleStartingTimestamp": 1733241408,
+
+  "finalizationPeriodSeconds": 12,
+
+  "proxyAdminOwner": "0xb2B01DeCb6cd36E7396b78D3744482627F22C525",
+  "baseFeeVaultRecipient": "0xb2B01DeCb6cd36E7396b78D3744482627F22C525",
+  "l1FeeVaultRecipient": "0xb2B01DeCb6cd36E7396b78D3744482627F22C525",
+  "sequencerFeeVaultRecipient": "0xb2B01DeCb6cd36E7396b78D3744482627F22C525",
+  "finalSystemOwner": "0xb2B01DeCb6cd36E7396b78D3744482627F22C525",
+  "superchainConfigGuardian": "0xb2B01DeCb6cd36E7396b78D3744482627F22C525",
+
+  "baseFeeVaultMinimumWithdrawalAmount": "0x8ac7230489e80000",
+  "l1FeeVaultMinimumWithdrawalAmount": "0x8ac7230489e80000",
+  "sequencerFeeVaultMinimumWithdrawalAmount": "0x8ac7230489e80000",
+  "baseFeeVaultWithdrawalNetwork": 0,
+  "l1FeeVaultWithdrawalNetwork": 0,
+  "sequencerFeeVaultWithdrawalNetwork": 0,
+
+  "gasPriceOracleOverhead": 0,
+  "gasPriceOracleScalar": 1000000,
+
+  "enableGovernance": false,
+  "governanceTokenSymbol": "OP",
+  "governanceTokenName": "Optimism",
+  "governanceTokenOwner": "0xb2B01DeCb6cd36E7396b78D3744482627F22C525",
+
+  "l2GenesisBlockGasLimit": "0xe4e1c00",
+  "l2GenesisBlockBaseFeePerGas": "0x3b9aca00",
+
+  "eip1559Denominator": 8,
+  "eip1559DenominatorCanyon": 8,
+  "eip1559Elasticity": 2,
+  "l2GenesisFjordTimeOffset": "0x0",
+  "l2GenesisRegolithTimeOffset": "0x0",
+  "l2GenesisEcotoneTimeOffset": "0x0",
+  "l2GenesisDeltaTimeOffset": "0x0",
+  "l2GenesisCanyonTimeOffset": "0x0",
+  "systemConfigStartBlock": 0,
+
+  "requiredProtocolVersion": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "recommendedProtocolVersion": "0x0000000000000000000000000000000000000000000000000000000000000000",
+
+  "faultGameAbsolutePrestate": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "faultGameMaxDepth": 44,
+  "faultGameClockExtension": 0,
+  "faultGameMaxClockDuration": 1200,
+  "faultGameGenesisBlock": 0,
+  "faultGameGenesisOutputRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "faultGameSplitDepth": 14,
+  "faultGameWithdrawalDelay": 600,
+
+  "preimageOracleMinProposalSize": 1800000,
+  "preimageOracleChallengePeriod": 300,
+
+  "useFaultProofs": false
+}
