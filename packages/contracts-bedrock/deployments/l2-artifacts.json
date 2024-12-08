@@ -1,8 +1,8 @@
 {
-  "L2CrossDomainMessenger": "0x60D82a012da21a487FF70951bE337B9d902311BC",
-  "L2CrossDomainMessengerProxy": "0x0107F46Fc38CC3Ac4358eddd61CDa8be12175907",
-  "L2StandardBridge": "0xaaF98433501e77DC80B005CD484588B22a937e4F",
-  "L2StandardBridgeProxy": "0x4ca86a4c3fe9E6c3D6eEc71889d4D31772AE8ca9",
-  "OptimismMintableERC20Factory": "0x27F7181B1D9806ba0FE2AA5523e691b13C661415",
-  "OptimismMintableERC20FactoryProxy": "0x9BB01d9fd730A302F904594ED762D72384F0AA21"
+  "L2CrossDomainMessenger": "0x11D6f6E4cD297a816592A56f90E41124dC02c758",
+  "L2CrossDomainMessengerProxy": "0xba90DbDa2e3f13D2dCCEfb1768112ddB1506a249",
+  "L2StandardBridge": "0x1BC411b534A12fdf70edA01b6a64f3b0a7203e8C",
+  "L2StandardBridgeProxy": "0x3197d211f6951cf263cf9aD1eA9a9ed016413395",
+  "OptimismMintableERC20Factory": "0x045538fb18B8Ebd5BA9a9DcddE723F273aEfCD19",
+  "OptimismMintableERC20FactoryProxy": "0x515b6D9d1f9Be7DBC35B19033C7fB1dc44E08a73"
 }
