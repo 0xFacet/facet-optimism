@@ -239,8 +239,8 @@ contract L2Genesis is Deployer {
     ///         This contract is NOT proxied and the state that is set
     ///         in the constructor is set manually.
     function setWETH() public {
-        console.log("Setting %s implementation at: %s", "WETH", Predeploys.WETH);
-        vm.etch(Predeploys.WETH, vm.getDeployedCode("WETH.sol:WETH"));
+        console.log("Setting %s implementation at: %s", "WFCT", Predeploys.WFCT);
+        vm.etch(Predeploys.WFCT, vm.getDeployedCode("WFCT.sol:WFCT"));
     }
 
     /// @notice This predeploy is following the safety invariant #1.
