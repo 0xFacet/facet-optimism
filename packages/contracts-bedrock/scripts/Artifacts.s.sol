@@ -132,8 +132,8 @@ abstract contract Artifacts {
             return payable(Predeploys.L1_MESSAGE_SENDER);
         } else if (digest == keccak256(bytes("DeployerWhitelist"))) {
             return payable(Predeploys.DEPLOYER_WHITELIST);
-        } else if (digest == keccak256(bytes("WETH"))) {
-            return payable(Predeploys.WETH);
+        } else if (digest == keccak256(bytes("WFCT"))) {
+            return payable(Predeploys.WFCT);
         } else if (digest == keccak256(bytes("LegacyERC20ETH"))) {
             return payable(Predeploys.LEGACY_ERC20_ETH);
         } else if (digest == keccak256(bytes("L1BlockNumber"))) {
