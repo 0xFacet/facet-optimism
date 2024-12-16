@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import { CommonTest } from "test/setup/CommonTest.sol";
 
 // Target contract
-import { WETH } from "src/L2/WETH.sol";
+import { WFCT } from "src/L2/WFCT.sol";
 
 contract WETH_Test is CommonTest {
     /// @dev Tests that the name function returns the correct value.

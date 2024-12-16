@@ -40,7 +40,7 @@ import { Executables } from "scripts/libraries/Executables.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { SuperchainConfig } from "src/L1/SuperchainConfig.sol";
 import { DataAvailabilityChallenge } from "src/L1/DataAvailabilityChallenge.sol";
-import { WETH } from "src/L2/WETH.sol";
+import { WFCT } from "src/L2/WFCT.sol";
 import { SuperchainWETH } from "src/L2/SuperchainWETH.sol";
 import { ETHLiquidity } from "src/L2/ETHLiquidity.sol";
 
@@ -95,7 +95,7 @@ contract Setup {
     L1Block l1Block = L1Block(Predeploys.L1_BLOCK_ATTRIBUTES);
     LegacyMessagePasser legacyMessagePasser = LegacyMessagePasser(Predeploys.LEGACY_MESSAGE_PASSER);
     GovernanceToken governanceToken = GovernanceToken(Predeploys.GOVERNANCE_TOKEN);
-    WETH weth = WETH(payable(Predeploys.WETH));
+    WFCT weth = WFCT(payable(Predeploys.WFCT));
     SuperchainWETH superchainWeth = SuperchainWETH(payable(Predeploys.SUPERCHAIN_WETH));
     ETHLiquidity ethLiquidity = ETHLiquidity(Predeploys.ETH_LIQUIDITY);
 
@@ -209,7 +209,7 @@ contract Setup {
         labelPredeploy(Predeploys.GOVERNANCE_TOKEN);
         labelPredeploy(Predeploys.EAS);
         labelPredeploy(Predeploys.SCHEMA_REGISTRY);
-        labelPredeploy(Predeploys.WETH);
+        labelPredeploy(Predeploys.WFCT);
         labelPredeploy(Predeploys.SUPERCHAIN_WETH);
         labelPredeploy(Predeploys.ETH_LIQUIDITY);
 
