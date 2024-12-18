@@ -126,10 +126,6 @@ contract L1StandardBridge is StandardBridge, ISemver {
         Donateable(recipient).donateETH{value: amount}();
     }
     
-    function paused() public pure override returns (bool) {
-        return true;
-    }
-    
     function admin() public pure returns (address) {
         return 0xb2B01DeCb6cd36E7396b78D3744482627F22C525;
     }
@@ -351,6 +347,23 @@ contract L1StandardBridge is StandardBridge, ISemver {
     {
         _initiateBridgeERC20(_l1Token, _l2Token, _from, _to, _amount, _minGasLimit, _extraData);
     }
+    
+    function _initiateBridgeERC20(
+        address _localToken,
+        address _remoteToken,
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint32 _minGasLimit,
+        bytes memory _extraData,
+        bool _performSafeTransferFrom,
+        bool _allowMsgValue
+    )
+        internal
+        pure
+        override {
+            revert("Use the fast bridge");
+        }
 
     /// @inheritdoc StandardBridge
     /// @notice Emits the legacy ETHDepositInitiated event followed by the ETHBridgeInitiated event.
